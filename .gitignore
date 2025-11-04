@@ -1,0 +1,8 @@
+# code repo related
+.ruff_cache
+.vscode
+scratch.py
+
+# local
+session_*/
+photos*/
