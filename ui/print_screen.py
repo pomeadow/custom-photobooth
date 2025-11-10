@@ -10,7 +10,9 @@ import cv2 as cv
 
 
 class PrintScreen(BaseScreen):
-    def __init__(self, image_processor: ImageProcessor, session_manager: SessionManager):
+    def __init__(
+        self, image_processor: ImageProcessor, session_manager: SessionManager
+    ):
         super().__init__()
         self._image_processor = image_processor
         self._session_manager = session_manager
@@ -35,7 +37,9 @@ class PrintScreen(BaseScreen):
         # Image preview label
         self.preview_label = QLabel()
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_label.setStyleSheet("border: 3px solid #2d5a2d; background-color: white;")
+        self.preview_label.setStyleSheet(
+            "border: 3px solid #2d5a2d; background-color: white;"
+        )
         self.preview_label.setMinimumSize(800, 400)
         main_layout.addWidget(self.preview_label)
 
@@ -77,16 +81,16 @@ class PrintScreen(BaseScreen):
     def generate_composite(self, photos_path):
         """Create and display the photo composite."""
         # Get template info from session manager
-        template_path, template_index = self._session_manager.template_info
+        template_path, template_index, num_photos = self._session_manager.template_info
 
-        if template_path is None or template_index is None:
+        if template_path is None or template_index is None or num_photos is None:
             raise ValueError("No template info available in session")
 
         # Create the composite
         self._composite_image = self._image_processor.create_photo_composite(
             photo_paths=photos_path,
             template_path=template_path,
-            template_index=template_index
+            template_index=template_index,
         )
 
         # Display the composite in the preview
@@ -102,8 +106,11 @@ class PrintScreen(BaseScreen):
         # Convert to QPixmap for display
         pixmap = self._image_processor.frame_to_qpixmap(
             self._composite_image,
-            target_size=(self.preview_label.width() - 10, self.preview_label.height() - 10),
-            keep_aspect=True
+            target_size=(
+                self.preview_label.width() - 10,
+                self.preview_label.height() - 10,
+            ),
+            keep_aspect=True,
         )
         self.preview_label.setPixmap(pixmap)
 

@@ -39,12 +39,13 @@ class CameraScreen(BaseScreen):
         self.photos_taken = 0
         self.countdown = CountdownTimer()
         self._frame_options = frame_options
-        self._overlay_path = frame_options[0]  # default is the first in list
+        self._overlay_path = None
         self._setup_ui()
         self._connect_signals()
 
     def on_enter(self):
         """Called when screen becomes active."""
+        print(f"CameraScreen.on_enter() called. photos_to_take={self.photos_to_take}")
         self.photos_taken = 0
         self._update_counter()
         if self.camera_controller.start_camera():
@@ -70,7 +71,7 @@ class CameraScreen(BaseScreen):
         # Frame selector (placeholder for now)
         frame_label = QLabel("Frame:")
         self.frame_combo = QComboBox()
-        self.frame_combo.addItems(["Default Frame", "Heart Frame", "Star Frame"])
+        self.frame_combo.addItems(["Default Frame", "Heart Frame", "Star Frame", "Frame 3", "Frame 4"])
         self.frame_combo.setStyleSheet("color: red;")
         self.frame_combo.currentIndexChanged.connect(self._on_frame_combo_changed)
         # TODO need to add previews of the frames (and how many photos it takes)
@@ -192,8 +193,10 @@ class CameraScreen(BaseScreen):
 
     def set_photos_to_take(self, count: int):
         """Set how many photos to capture in this session."""
+        print(f"Setting photos_to_take to: {count}")
         self.photos_to_take = count
         self._update_counter()
+        print(f"Counter updated. photos_to_take is now: {self.photos_to_take}")
 
     def _on_countdown_tick(self, seconds: int):
         self.timer_label.setText(str(seconds))

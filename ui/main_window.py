@@ -12,7 +12,7 @@ from ui.title_screen import TitleScreen
 
 
 class PhotoboothGUI(QMainWindow):
-    def __init__(self) -> None:
+    def __init__(self, DEFAULT_OVERLAY_PATH) -> None:
         super().__init__()
         self.setWindowTitle("Christmas Photobooth")
         self.setGeometry(100, 100, 800, 600)
@@ -26,11 +26,10 @@ class PhotoboothGUI(QMainWindow):
         self._session_manager = SessionManager(base_dir=base_dir)
         self._image_processor = ImageProcessor()
 
-        self.DEFAULT_OVERLAY_PATH = "/Users/chewyan/Documents/carrot-tp.png"
+        self.DEFAULT_OVERLAY_PATH = DEFAULT_OVERLAY_PATH
         self.number_of_photos = 1
         self.current_session_folder = None
         self.selected_layout_path = None
-        self._image_processor.load_overlay(self.DEFAULT_OVERLAY_PATH)
         self._setup_ui()
 
     def _setup_ui(self):
@@ -48,14 +47,14 @@ class PhotoboothGUI(QMainWindow):
             session_manager=self._session_manager,
             frame_options=[
                 self.DEFAULT_OVERLAY_PATH,
-                "/Users/chewyan/christmas-frame1.png",
-                "/Users/chewyan/christmas-frame2.png",
+                "./resources/frames/christmas-frame1.png",
+                "./resources/frames/3.png",
+                "./resources/frames/christmas-frame3.png",
             ],
         )
         self.selection_screen = SelectionScreen(session_manager=self._session_manager)
         self.print_screen = PrintScreen(
-            image_processor=self._image_processor,
-            session_manager=self._session_manager
+            image_processor=self._image_processor, session_manager=self._session_manager
         )
 
         self.stacked_widget.addWidget(self.title_screen)
@@ -103,13 +102,19 @@ class PhotoboothGUI(QMainWindow):
         if hasattr(new_widget, "on_enter"):
             new_widget.on_enter()  # type: ignore
 
-    def _on_layout_selected(self, layout_path: str, num_photos: int, template_index: int):
+    def _on_layout_selected(
+        self,
+        layout_path: str,
+        num_photos: int,
+        template_index: int,
+        template_num_photos: int,
+    ):
         """Handle layout selection."""
         # Configure camera screen
-        self.camera_screen.set_photos_to_take(num_photos)
+        self.camera_screen.set_photos_to_take(template_num_photos)
 
         # Create new session with template info
-        self._session_manager.create_session(layout_path, template_index)
+        self._session_manager.create_session(layout_path, template_index, num_photos)
 
         # Navigate to camera
         self.navigate_to_screen("camera")

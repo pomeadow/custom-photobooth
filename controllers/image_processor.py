@@ -3,6 +3,7 @@ from PySide6.QtCore import QObject, Qt
 from PySide6.QtGui import QImage, QPixmap
 import cv2 as cv
 import numpy as np
+from config.load_metadata import templates_config as meta_config
 
 
 class ImageProcessor(QObject):
@@ -126,9 +127,16 @@ class ImageProcessor(QObject):
 
         # Scale if target size specified
         if target_size:
-            aspect_mode = Qt.KeepAspectRatio if keep_aspect else Qt.IgnoreAspectRatio
+            aspect_mode = (
+                Qt.AspectRatioMode.KeepAspectRatio
+                if keep_aspect
+                else Qt.AspectRatioMode.IgnoreAspectRatio
+            )
             pixmap = pixmap.scaled(
-                target_size[0], target_size[1], aspect_mode, Qt.SmoothTransformation
+                target_size[0],
+                target_size[1],
+                aspect_mode,
+                Qt.TransformationMode.SmoothTransformation,
             )
 
         return pixmap
@@ -158,53 +166,18 @@ class ImageProcessor(QObject):
 
         # Get template dimensions
         template_height, template_width = template.shape[:2]
+        print("Template ", template_height, template_width)
 
         # Define photo slot positions for each template (x, y, width, height)
         # These are approximate positions based on the visual inspection of templates
-        template_configs = {
-            0: {  # template1.png - 1x3 horizontal layout
-                "slots": [
-                    (35, 30, 305, 305),  # Left slot
-                    (355, 30, 305, 305),  # Middle slot
-                    (985, 30, 305, 305),  # Right slot
-                ],
-                "num_photos": 3,
-            },
-            1: {  # template2.png - 1x3 horizontal layout (different sizing)
-                "slots": [
-                    (50, 35, 350, 310),  # Left slot
-                    (460, 35, 420, 310),  # Middle slot
-                    (900, 35, 360, 310),  # Right slot
-                ],
-                "num_photos": 3,
-            },
-            2: {  # template3.png - 2x3 grid layout
-                "slots": [
-                    (45, 50, 360, 280),  # Top-left
-                    (470, 50, 360, 280),  # Top-middle
-                    (870, 50, 360, 280),  # Top-right
-                    (45, 385, 360, 280),  # Bottom-left
-                    (470, 385, 360, 280),  # Bottom-middle
-                    (870, 385, 360, 280),  # Bottom-right
-                ],
-                "num_photos": 6,
-            },
-            3: {  # template4.png - 2x2 grid layout
-                "slots": [
-                    (50, 50, 570, 300),  # Top-left
-                    (675, 50, 570, 300),  # Top-right
-                    (50, 385, 570, 300),  # Bottom-left
-                    (675, 385, 570, 300),  # Bottom-right
-                ],
-                "num_photos": 4,
-            },
-        }
+        template_configs = meta_config
 
         if template_index not in template_configs:
             raise ValueError(f"Invalid template index: {template_index}")
 
         config = template_configs[template_index]
         slots = config["slots"]
+        to_rotate = config["toRotate"]
         num_photos_needed = min(len(photo_paths), len(slots))
 
         # Create a copy of the template to work with
@@ -221,22 +194,22 @@ class ImageProcessor(QObject):
                 print(f"Warning: Could not load photo {photo_path}")
                 continue
 
-            # Resize photo to fit slot while maintaining aspect ratio
+            if to_rotate:
+                photo = cv.rotate(photo, cv.ROTATE_90_COUNTERCLOCKWISE)
+
+            # Resize and crop photo to exactly fill the slot
             photo_resized = self._resize_photo_to_slot(photo, slot_w, slot_h)
 
-            # Calculate centering offsets if photo is smaller than slot
-            ph, pw = photo_resized.shape[:2]
-            offset_x = (slot_w - pw) // 2
-            offset_y = (slot_h - ph) // 2
-
-            # Place photo in the slot
-            final_x = slot_x + offset_x
-            final_y = slot_y + offset_y
-
+            # Photo is now exactly slot_w × slot_h, place directly at slot position
             try:
-                result[final_y : final_y + ph, final_x : final_x + pw] = photo_resized
+                result[slot_y : slot_y + slot_h, slot_x : slot_x + slot_w] = (
+                    photo_resized
+                )
             except Exception as e:
                 print(f"Error placing photo {i}: {e}")
+                print(f"  Template size: {template_height}x{template_width}")
+                print(f"  Photo size: {photo_resized.shape[:2]}")
+                print(f"  Slot: ({slot_x}, {slot_y}, {slot_w}, {slot_h})")
 
         return result
 
@@ -244,7 +217,8 @@ class ImageProcessor(QObject):
         self, photo: np.ndarray, slot_width: int, slot_height: int
     ) -> np.ndarray:
         """
-        Resize photo to fit within slot dimensions while maintaining aspect ratio.
+        Resize photo to exactly fill slot dimensions (crop to fit).
+        Photo is scaled to cover the entire slot, then center-cropped to exact size.
 
         Args:
             photo: Input photo (BGR format)
@@ -252,30 +226,38 @@ class ImageProcessor(QObject):
             slot_height: Target slot height
 
         Returns:
-            Resized photo
+            Photo exactly matching slot dimensions (slot_height, slot_width, 3)
         """
         h, w = photo.shape[:2]
-        aspect_ratio = w / h
-        slot_aspect_ratio = slot_width / slot_height
 
-        # Determine scaling to fill the slot (crop if necessary)
-        if aspect_ratio > slot_aspect_ratio:
-            # Photo is wider than slot - fit to height
-            new_h = slot_height
-            new_w = int(new_h * aspect_ratio)
-        else:
-            # Photo is taller than slot - fit to width
-            new_w = slot_width
-            new_h = int(new_w / aspect_ratio)
+        # Calculate scale factors for both dimensions
+        scale_w = slot_width / w
+        scale_h = slot_height / h
+
+        # Use the LARGER scale factor to ensure photo covers entire slot
+        scale = max(scale_w, scale_h)
+
+        # Calculate new dimensions (at least one will be larger than slot)
+        new_w = int(w * scale)
+        new_h = int(h * scale)
 
         # Resize photo
         resized = cv.resize(photo, (new_w, new_h), interpolation=cv.INTER_LANCZOS4)
 
-        # If resized photo is larger than slot, crop it
-        if new_w > slot_width or new_h > slot_height:
-            # Center crop
-            start_x = (new_w - slot_width) // 2
-            start_y = (new_h - slot_height) // 2
-            resized = resized[start_y : start_y + slot_height, start_x : start_x + slot_width]
+        # Center crop to EXACT slot dimensions
+        start_x = max(0, (new_w - slot_width) // 2)
+        start_y = max(0, (new_h - slot_height) // 2)
 
-        return resized
+        # Ensure we don't go out of bounds
+        end_x = start_x + slot_width
+        end_y = start_y + slot_height
+
+        cropped = resized[start_y:end_y, start_x:end_x]
+
+        # Final safety: if cropped isn't exactly right size, force resize
+        if cropped.shape[0] != slot_height or cropped.shape[1] != slot_width:
+            cropped = cv.resize(
+                cropped, (slot_width, slot_height), interpolation=cv.INTER_LANCZOS4
+            )
+
+        return cropped

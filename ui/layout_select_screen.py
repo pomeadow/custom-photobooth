@@ -6,40 +6,22 @@ from components.range_selector import RangeSelectorWidget
 from ui.base_screen import BaseScreen
 from ui.styles import buttons_css
 from utils import get_png_file_paths
+from config.load_metadata import layout_metadata, templates_path
 
 
 class LayoutSelectScreen(BaseScreen):
     # Signals
-    layout_selected = Signal(str, int, int)  # (template_path, num_photos, template_index)
+    layout_selected = Signal(
+        str, int, int, int
+    )  # (template_path, num_photos, template_index, template_num_of_photos)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: #ffffff;")
         # Layout metadata: {path: {index, num_photos, display_text}}
-        self.templates_path = get_png_file_paths("./resources/templates/")
+        self.templates_path = templates_path
         self.layout_labels = {}  # Dictionary to track all layout labels
-        self.layout_metadata = {
-            self.templates_path[0]: {
-                "index": 0,
-                "num_photos": 4,
-                "display_text": "2 x 2",
-            },
-            self.templates_path[1]: {
-                "index": 1,
-                "num_photos": 6,
-                "display_text": "2 x 3",
-            },
-            self.templates_path[2]: {
-                "index": 2,
-                "num_photos": 3,
-                "display_text": "1 x 3",
-            },
-            self.templates_path[3]: {
-                "index": 3,
-                "num_photos": 4,
-                "display_text": "1 x 4",
-            },
-        }
+        self.layout_metadata = layout_metadata
         self.selected_layout_path = None
         self._setup_ui()
 
@@ -183,4 +165,14 @@ class LayoutSelectScreen(BaseScreen):
         # Get the template index from metadata
         template_index = self.layout_metadata[self.selected_layout_path]["index"]
 
-        self.layout_selected.emit(self.selected_layout_path, self.number_of_photos, template_index)
+        # Get the template number of photos from metadata
+        template_number_of_photos = self.layout_metadata[self.selected_layout_path][
+            "num_photos"
+        ]
+
+        self.layout_selected.emit(
+            self.selected_layout_path,
+            self.number_of_photos,
+            template_index,
+            template_number_of_photos,
+        )
