@@ -1,4 +1,5 @@
 from email.mime import image
+import os
 from typing import List
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
@@ -22,6 +23,7 @@ from ui.styles import buttons_css
 class CameraScreen(BaseScreen):
     # Signals
     session_complete = Signal()
+    session_continued = Signal()
 
     def __init__(
         self,
@@ -49,7 +51,7 @@ class CameraScreen(BaseScreen):
         self.photos_taken = 0
         self._update_counter()
         if self.camera_controller.start_camera():
-            self.countdown.start(5)  # Start 5 second countdown
+            self.countdown.start(5)  # Start 20 second countdown
         else:
             self.timer_label.setText("Camera Error")
 
@@ -71,29 +73,31 @@ class CameraScreen(BaseScreen):
         # Frame selector (placeholder for now)
         frame_label = QLabel("Frame:")
         self.frame_combo = QComboBox()
-        self.frame_combo.addItems(["Default Frame", "Heart Frame", "Star Frame", "Frame 3", "Frame 4"])
+        self.frame_combo.addItems(
+            ["Default Frame", "Heart Frame", "Star Frame", "Frame 3", "Frame 4"]
+        )
         self.frame_combo.setStyleSheet("color: red;")
         self.frame_combo.currentIndexChanged.connect(self._on_frame_combo_changed)
-        # TODO need to add previews of the frames (and how many photos it takes)
 
         # Control buttons
         self.back_button = QPushButton("← Back to Title")
         self.back_button.clicked.connect(lambda: self.navigate_to.emit("title"))
         self.back_button.setStyleSheet(buttons_css)
 
-        self.capture_button = QPushButton("Capture Photo")
-        self.capture_button.clicked.connect(self._capture_photo)
-        self.capture_button.setStyleSheet(buttons_css)
+        # self.capture_button = QPushButton("Capture Photo")
+        # self.capture_button.clicked.connect(self._capture_photo)
+        # self.capture_button.setStyleSheet(buttons_css)
 
         self.next_button = QPushButton("Next")
         self.next_button.setFont(QFont("Arial", 18))
         self.next_button.setStyleSheet(buttons_css)
         self.next_button.clicked.connect(lambda: self.navigate_to.emit("selection"))
-        self.next_button.setEnabled(True)
+        self.next_button.setEnabled(False)
 
         # Photo counter
         self.counter_label = QLabel()
         self.counter_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.counter_label.setStyleSheet("font-size: 48px; color: blue;")
         self._update_counter()
 
         self.timer_label = QLabel()
@@ -104,9 +108,12 @@ class CameraScreen(BaseScreen):
         # Add to left panel
         left_panel.addWidget(self.back_button)
         left_panel.addWidget(self.counter_label)
-        left_panel.addWidget(frame_label)
-        left_panel.addWidget(self.frame_combo)
-        left_panel.addWidget(self.capture_button)
+        if os.getenv("VERSION") == "0.0":
+            left_panel.addWidget(frame_label)
+            left_panel.addWidget(self.frame_combo)
+
+        # left_panel.addWidget(self.capture_button)
+
         left_panel.addWidget(self.next_button)
         left_panel.addWidget(self.timer_label)
         # TODO set fixed size for left panel
@@ -137,12 +144,6 @@ class CameraScreen(BaseScreen):
         # Button signals
         self.next_button.clicked.connect(lambda: self.navigate_to.emit("selection"))
 
-    # def _start_capture_sequence(self):
-    #     """Manual capture button pressed."""
-    #     if self.countdown.is_running:
-    #         return
-    #     self.countdown.start(3)  # Quick 3 second countdown
-
     def _on_camera_frame(self, frame):
         """Update preview with camera frame."""
         # Apply overlay and convert to pixmap
@@ -156,7 +157,6 @@ class CameraScreen(BaseScreen):
         self.camera_label.setPixmap(pixmap)
 
     def _capture_photo(self):
-        print(f"{self.photos_taken} 111")
         frame = self.camera_controller.capture_photo()
         if frame is None:
             return
@@ -173,11 +173,13 @@ class CameraScreen(BaseScreen):
         self._update_counter()
 
         if self.photos_taken >= self.photos_to_take:
-            self.session_complete.emit()
-            print(f"{self.photos_taken} 333")
+            if os.getenv("VERSION") == "0.0":
+                self.session_complete.emit()
+            else:
+                self.session_continued.emit()
             self.navigate_to.emit("selection")
         else:
-            # Only restart countdown if we still have photos to take
+            # Only restart 20 seconds countdown if we still have photos to take
             self.countdown.start(5)
 
     def _on_frame_combo_changed(self, index):

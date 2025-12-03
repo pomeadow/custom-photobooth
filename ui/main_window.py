@@ -40,7 +40,7 @@ class PhotoboothGUI(QMainWindow):
 
         # Create title screen
         self.title_screen = TitleScreen()
-        self.layout_screen = LayoutSelectScreen()
+        self.layout_screen = LayoutSelectScreen(session_manager=self._session_manager)
         self.camera_screen = CameraScreen(
             camera_controller=self._camera_controller,
             image_processor=self._image_processor,
@@ -57,10 +57,11 @@ class PhotoboothGUI(QMainWindow):
             image_processor=self._image_processor, session_manager=self._session_manager
         )
 
+        # Order that it is added matters
         self.stacked_widget.addWidget(self.title_screen)
-        self.stacked_widget.addWidget(self.layout_screen)
         self.stacked_widget.addWidget(self.camera_screen)
         self.stacked_widget.addWidget(self.selection_screen)
+        self.stacked_widget.addWidget(self.layout_screen)
         self.stacked_widget.addWidget(self.print_screen)
 
         self.title_screen.navigate_to.connect(self.navigate_to_screen)
@@ -72,12 +73,16 @@ class PhotoboothGUI(QMainWindow):
         self.layout_screen.layout_selected.connect(self._on_layout_selected)
         self.camera_screen.session_complete.connect(self._on_session_complete)
 
+        # Connect this method to the same method if layout screen if not active
+        self.title_screen.create_session_signal.connect(self._on_skip_layout_create_session)
+        self.camera_screen.session_continued.connect(self._on_session_continued)
+
         # Start with title screen
         self.navigate_to_screen("title")
         self.stacked_widget.setCurrentIndex(0)
 
     def navigate_to_screen(self, screen_name: str):
-        screen_map = {"title": 0, "layout": 1, "camera": 2, "selection": 3, "print": 4}
+        screen_map = {"title": 0, "camera": 1, "selection": 2,"layout": 3,"print": 4}
 
         # Call on_exit for current screen
         current_widget = self.stacked_widget.currentWidget()
@@ -110,11 +115,23 @@ class PhotoboothGUI(QMainWindow):
         template_num_photos: int,
     ):
         """Handle layout selection."""
-        # Configure camera screen
-        self.camera_screen.set_photos_to_take(template_num_photos)
+        # Update the current session with selected template info
+        self._session_manager.set_template_path(layout_path)
+        self._session_manager.set_template_index(template_index)
+        self._session_manager.set_num_photos(num_photos)
+        self._session_manager.set_template_num_photos(template_num_photos)
 
-        # Create new session with template info
-        self._session_manager.create_session(layout_path, template_index, num_photos)
+        # Navigate to print
+        self.navigate_to_screen("print")
+
+    def _on_skip_layout_create_session(
+        self
+    ):
+        # Configure camera screen
+        self.camera_screen.set_photos_to_take(4)
+
+        # Create new session with template info -- num of photos to set later
+        self._session_manager.create_default_session()
 
         # Navigate to camera
         self.navigate_to_screen("camera")
@@ -127,6 +144,12 @@ class PhotoboothGUI(QMainWindow):
         if self._session_manager.template_info[0] is None:
             raise ValueError("Should not happen")
         self._image_processor.load_overlay(self._session_manager.template_info[0])
+        pass
+
+    def _on_session_continued(self):
+        # Could show completion message, play sound, etc.
+        if self._session_manager.template_info is None:
+            raise ValueError("Should not happen")
         pass
 
     def closeEvent(self, event):

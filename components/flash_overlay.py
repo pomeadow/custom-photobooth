@@ -16,7 +16,8 @@ class FlashOverlay(QObject):
         self,
     ):
         # Flash white
-        self.white_pixmap.fill(Qt.white)
+        self.camera_label.setPixmap(self.white_pixmap)
+        self.white_pixmap.fill(Qt.GlobalColor.white)
 
         # Use QTimer to restore after 200ms
         QTimer.singleShot(

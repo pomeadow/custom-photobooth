@@ -19,6 +19,7 @@ class RangeSelectorWidget(QWidget):
         min_value=1,
         max_value=10,
         label_text="",
+        step=2,
     ):
         super().__init__(parent)
         self.current_value = initial_value
@@ -26,6 +27,7 @@ class RangeSelectorWidget(QWidget):
         self.min_value = min_value
         self.max_value = max_value
         self.label_text = label_text
+        self.step = step
         self.setup_ui()
         self.connect_signals()
 
@@ -121,9 +123,13 @@ class RangeSelectorWidget(QWidget):
     def increment_value(self):
         """Increments the current value."""
         try:
+            if self.step is not None:
+                inc = self.step
+            else:
+                inc = 1
             current_int = int(self.value_display.text())
             if current_int < self.max_value:
-                self.current_value = current_int + 1
+                self.current_value = current_int + inc
                 self.value_display.setText(str(self.current_value))
         except ValueError:
             # Handle cases where non-integer text is in the line edit
@@ -132,9 +138,13 @@ class RangeSelectorWidget(QWidget):
     def decrement_value(self):
         """Decrements the current value."""
         try:
+            if self.step is not None:
+                dec = self.step
+            else:
+                dec = 1
             current_int = int(self.value_display.text())
             if current_int > self.min_value:
-                self.current_value = current_int - 1
+                self.current_value = current_int - dec
                 self.value_display.setText(str(self.current_value))
         except ValueError:
             # Handle cases where non-integer text is in the line edit

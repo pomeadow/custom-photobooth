@@ -24,6 +24,21 @@ class SessionManager:
         print(f"Created session folder: {self._current_session_folder}")
         return self._current_session_folder
 
+    def create_default_session(self):
+        return self.create_session("", 0, None)
+
+    def set_template_path(self, template_path: str):
+        self._template_path = template_path
+
+    def set_template_index(self, template_index: int):
+        self._template_index = template_index
+
+    def set_num_photos(self, num_photos: int):
+        self._num_photos = num_photos
+
+    def set_template_num_photos(self, template_num_photos: int):
+        self._template_num_photos = template_num_photos
+    
     @property
     def get_current_session_folder(self):
         return self._current_session_folder

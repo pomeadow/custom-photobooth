@@ -1,10 +1,13 @@
-from PySide6.QtCore import Qt
+import os
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 from ui.base_screen import BaseScreen
 
 
 class TitleScreen(BaseScreen):
+    create_session_signal = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._setup_ui()
@@ -61,7 +64,7 @@ class TitleScreen(BaseScreen):
                 background-color: #a01e1e;
             }
         """)
-        start_photobooth_button.clicked.connect(lambda: self.navigate_to.emit("layout"))
+        start_photobooth_button.clicked.connect(self._emit_signals)
 
         # title_layout.addWidget(title_label)
         # title_layout.addWidget(subtitle_label)
@@ -73,3 +76,7 @@ class TitleScreen(BaseScreen):
 
     def on_exit(self):
         return super().on_exit()
+
+    def _emit_signals(self):
+        self.create_session_signal.emit()
+        self.navigate_to.emit("camera")

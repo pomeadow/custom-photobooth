@@ -5,8 +5,8 @@ from components.clickable_label import ClickableLabel
 from components.range_selector import RangeSelectorWidget
 from ui.base_screen import BaseScreen
 from ui.styles import buttons_css
-from utils import get_png_file_paths
-from config.load_metadata import layout_metadata, templates_path
+from config.load_metadata import layout_metadata_v0_1, templates_path
+from generate_all_composites import get_session_photos, generate_all_composites
 
 
 class LayoutSelectScreen(BaseScreen):
@@ -15,20 +15,22 @@ class LayoutSelectScreen(BaseScreen):
         str, int, int, int
     )  # (template_path, num_photos, template_index, template_num_of_photos)
 
-    def __init__(self, parent=None):
+    def __init__(self, session_manager=None, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: #ffffff;")
         # Layout metadata: {path: {index, num_photos, display_text}}
+        self.session_manager = session_manager
         self.templates_path = templates_path
         self.layout_labels = {}  # Dictionary to track all layout labels
-        self.layout_metadata = layout_metadata
+        self.layout_metadata = layout_metadata_v0_1
         self.selected_layout_path = None
+        self.composite_paths = {}  # Will store template_index -> composite_path mapping
         self._setup_ui()
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
 
-        title_label = QLabel("Choose a layout for your photo <3")
+        title_label = QLabel("Choose a layout for your photo")
         title_font = QFont()
         title_font.setPointSize(36)
         title_font.setBold(True)
@@ -93,7 +95,7 @@ class LayoutSelectScreen(BaseScreen):
             grid_layout.addWidget(container, row, col)
 
         self.number_of_photos_selector_widget = RangeSelectorWidget(
-            initial_value=1, min_value=1, max_value=4, label_text="Number of photos"
+            initial_value=2, min_value=1, max_value=4, label_text="Number of photos"
         )
 
         # Create bottom grid layout for proper centering
@@ -104,11 +106,11 @@ class LayoutSelectScreen(BaseScreen):
         )  # Reduced margins to prevent cutting off
         bottom_layout.setVerticalSpacing(0)
 
-        next_button = QPushButton("Confirm")
-        next_button.setFont(QFont("Arial", 18))
-        next_button.setStyleSheet(buttons_css)
-        next_button.clicked.connect(self._on_next_button)
-        next_button.setEnabled(True)
+        confirm_button = QPushButton("Confirm")
+        confirm_button.setFont(QFont("Arial", 18))
+        confirm_button.setStyleSheet(buttons_css)
+        confirm_button.clicked.connect(self._on_confirm_button)
+        confirm_button.setEnabled(True)
 
         # Add widgets to grid:
         # Row 0, Column 1: centered selector widget
@@ -120,7 +122,7 @@ class LayoutSelectScreen(BaseScreen):
             Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter,
         )
         bottom_layout.addWidget(
-            next_button,
+            confirm_button,
             0,
             2,
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
@@ -142,8 +144,49 @@ class LayoutSelectScreen(BaseScreen):
         pass
 
     def on_enter(self):
+        """Generate composites for all templates and update the display."""
+        # Generate composites if we have a session manager
+        if self.session_manager:
+            session_folder = self.session_manager.get_current_session_folder
+            if session_folder:
+                # Get photos from the current session
+                photo_paths = get_session_photos(session_folder)
+
+                if photo_paths:
+                    # Generate composites for all templates
+                    print(f"Generating composites for all templates using {len(photo_paths)} photos...")
+                    self.composite_paths = generate_all_composites(
+                        photo_paths=photo_paths,
+                        output_dir=session_folder,
+                        output_prefix="preview_composite"
+                    )
+
+                    # Update the display with generated composites
+                    self._update_composite_previews()
+
         self._on_select_layout(None)
-        pass
+
+    def _update_composite_previews(self):
+        """Update the layout preview images with generated composites."""
+        # Map template paths to template indices
+        template_path_to_index = {
+            path: meta["index"]
+            for path, meta in self.layout_metadata.items()
+        }
+
+        # Update each label with its corresponding composite
+        for template_path, label in self.layout_labels.items():
+            template_index = template_path_to_index.get(template_path)
+            if template_index is not None and template_index in self.composite_paths:
+                composite_path = self.composite_paths[template_index]
+                pixmap = QPixmap(composite_path)
+                scaled_pixmap = pixmap.scaled(
+                    label.size(),
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+                label.setPixmap(scaled_pixmap)
+                print(f"Updated template {template_index} preview with {composite_path}")
 
     def _on_select_layout(self, value):
         """
@@ -157,7 +200,7 @@ class LayoutSelectScreen(BaseScreen):
             else:
                 lbl.setStyleSheet("background-color: transparent")
 
-    def _on_next_button(self):
+    def _on_confirm_button(self):
         if self.selected_layout_path is None:
             raise ValueError("No layout selected")
         self.number_of_photos = self.number_of_photos_selector_widget.current_value

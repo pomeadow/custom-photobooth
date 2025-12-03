@@ -1,29 +1,44 @@
 from utils import get_png_file_paths
 
 
-templates_path = get_png_file_paths("./resources/templates/")
-layout_metadata = {
+# templates_path = get_png_file_paths("./resources/templates/")
+templates_path = get_png_file_paths("./resources/templates/v0.1/")
+# layout_metadata_v0 = {
+#     templates_path[0]: {
+#         "index": 0,
+#         "num_photos": 6,
+#         "display_text": "2 x 3",
+#     },
+#     templates_path[1]: {
+#         "index": 1,
+#         "num_photos": 4,
+#         "display_text": "1 x 4",
+#     },
+#     templates_path[2]: {
+#         "index": 2,
+#         "num_photos": 3,
+#         "display_text": "1 x 3",
+#     },
+#     templates_path[3]: {
+#         "index": 3,
+#         "num_photos": 4,
+#         "display_text": "2 x 2",
+#     },
+# }
+
+layout_metadata_v0_1 = {
     templates_path[0]: {
         "index": 0,
         "num_photos": 6,
         "display_text": "2 x 3",
     },
     templates_path[1]: {
-        "index": 1,
-        "num_photos": 4,
-        "display_text": "1 x 4",
-    },
-    templates_path[2]: {
-        "index": 2,
-        "num_photos": 3,
-        "display_text": "1 x 3",
-    },
-    templates_path[3]: {
         "index": 3,
         "num_photos": 4,
         "display_text": "2 x 2",
     },
 }
+
 templates_config = {
     0: {  # templateup4.png - 2x3 grid layout
         "slots": [

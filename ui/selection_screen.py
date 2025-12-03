@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
@@ -49,24 +50,28 @@ class SelectionScreen(BaseScreen):
         # Navigation buttons
         top_nav_layout = QHBoxLayout()
 
-        self.prev_button = QPushButton("← Previous")
-        self.prev_button.clicked.connect(self.show_previous_images)
-        self.prev_button.setStyleSheet(buttons_css)
-        self.next_button_nav = QPushButton("Next →")
-        self.next_button_nav.clicked.connect(self.show_next_images)
-        self.next_button_nav.setStyleSheet(buttons_css)
+        # self.prev_button = QPushButton("← Previous")
+        # self.prev_button.clicked.connect(self.show_previous_images)
+        # self.prev_button.setStyleSheet(buttons_css)
+
+        # self.next_button_nav = QPushButton("Next →")
+        # self.next_button_nav.clicked.connect(self.show_next_images)
+        # self.next_button_nav.setStyleSheet(buttons_css)
 
         self.page_label = QLabel()
         self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        top_nav_layout.addWidget(self.prev_button)
+        # top_nav_layout.addWidget(self.prev_button)
         top_nav_layout.addWidget(self.page_label)
-        top_nav_layout.addWidget(self.next_button_nav)
+        # top_nav_layout.addWidget(self.next_button_nav)
 
         bottom_nav_layout = QHBoxLayout()
-        print_button = QPushButton("Print!")
-        print_button.clicked.connect(lambda: self.navigate_to.emit("print"))
+        label_instructions = QLabel("Select min 2, max 3 photos")
+        label_instructions.setStyleSheet("font-size: 48px; color: blue;")
+        print_button = QPushButton("Next")
+        print_button.clicked.connect(lambda: self.navigate_to.emit("layout"))
         print_button.setStyleSheet(buttons_css)
+        bottom_nav_layout.addWidget(label_instructions)
         bottom_nav_layout.addWidget(print_button)
 
         # Grid for images
@@ -139,8 +144,24 @@ class SelectionScreen(BaseScreen):
         ) // self.images_per_page
         self.page_label.setText(f"Page {self.current_page + 1} of {total_pages}")
 
-        self.prev_button.setEnabled(self.current_page > 0)
-        self.next_button_nav.setEnabled(self.current_page < total_pages - 1)
+        # # Update button states
+        # self.prev_button.setEnabled(self.current_page > 0)
+        # self.next_button_nav.setEnabled(self.current_page < total_pages - 1)
+
+        # # Apply disabled styling
+        # if self.current_page > 0:
+        #     self.prev_button.setStyleSheet(buttons_css)
+        # else:
+        #     self.prev_button.setStyleSheet(
+        #         buttons_css + "background-color: #666; color: #999;"
+        #     )
+
+        # if self.current_page < total_pages - 1:
+        #     self.next_button_nav.setStyleSheet(buttons_css)
+        # else:
+        #     self.next_button_nav.setStyleSheet(
+        #         buttons_css + "background-color: #666; color: #999;"
+        #     )
 
     def _on_label_clicked(self, image_path):
         """Handle image selection/deselection"""
