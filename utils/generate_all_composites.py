@@ -55,31 +55,37 @@ def generate_all_composites(photo_paths, output_dir=None, output_prefix="composi
         # Get the template file path
         template_files = {
             0: "./resources/templates/v0.1/templateup4.png",  # 2x3, 6 photos
-            1: "./resources/templates/templateup1.png",        # 1x4, 4 photos
-            2: "./resources/templates/templateup2.png",        # 1x3, 3 photos
-            3: "./resources/templates/v0.1/templateup3.png",   # 2x2, 4 photos
+            1: "./resources/templates/templateup1.png",  # 1x4, 4 photos
+            2: "./resources/templates/templateup2.png",  # 1x3, 3 photos
+            3: "./resources/templates/v0.1/templateup3.png",  # 2x2, 4 photos
         }
 
         template_path = template_files.get(template_index)
         if not template_path or not os.path.exists(template_path):
-            print(f"Template {template_index}: Template file not found at {template_path}")
+            print(
+                f"Template {template_index}: Template file not found at {template_path}"
+            )
             continue
 
         # Check if we have enough photos
         if len(photo_paths) < num_photos_needed:
-            print(f"Template {template_index}: Needs {num_photos_needed} photos, but only {len(photo_paths)} provided. Skipping.")
+            print(
+                f"Template {template_index}: Needs {num_photos_needed} photos, but only {len(photo_paths)} provided. Skipping."
+            )
             continue
 
         # Use the required number of photos (cycle if we have more)
         photos_to_use = photo_paths[:num_photos_needed]
 
-        print(f"Template {template_index} ({template_info['num_photos']} photos, rotate={template_info['toRotate']})...")
+        print(
+            f"Template {template_index} ({template_info['num_photos']} photos, rotate={template_info['toRotate']})..."
+        )
 
         try:
             composite = processor.create_photo_composite(
                 photo_paths=photos_to_use,
                 template_path=template_path,
-                template_index=template_index
+                template_index=template_index,
             )
 
             # Save the composite
@@ -93,6 +99,7 @@ def generate_all_composites(photo_paths, output_dir=None, output_prefix="composi
         except Exception as e:
             print(f"Error generating composite for template {template_index}: {e}")
             import traceback
+
             traceback.print_exc()
 
     print(f"\n✨ Generated {len(results)} composites successfully!")
@@ -107,27 +114,22 @@ def main():
         description="Generate photo composites for all available templates"
     )
     parser.add_argument(
-        "--session",
-        type=str,
-        help="Path to session directory containing photos"
+        "--session", type=str, help="Path to session directory containing photos"
     )
     parser.add_argument(
-        "--photos",
-        type=str,
-        nargs="+",
-        help="List of photo paths to use"
+        "--photos", type=str, nargs="+", help="List of photo paths to use"
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default="./composite_output",
-        help="Directory to save composites (default: ./composite_output)"
+        help="Directory to save composites (default: ./composite_output)",
     )
     parser.add_argument(
         "--output-prefix",
         type=str,
         default="composite",
-        help="Prefix for output filenames (default: composite)"
+        help="Prefix for output filenames (default: composite)",
     )
 
     args = parser.parse_args()
@@ -154,8 +156,12 @@ def main():
         if not photo_paths:
             print("Error: No photos specified and no sessions found.")
             print("\nUsage examples:")
-            print("  python generate_all_composites.py --session ./session_20251111_003314")
-            print("  python generate_all_composites.py --photos photo1.png photo2.png photo3.png photo4.png photo5.png photo6.png")
+            print(
+                "  python generate_all_composites.py --session ./session_20251111_003314"
+            )
+            print(
+                "  python generate_all_composites.py --photos photo1.png photo2.png photo3.png photo4.png photo5.png photo6.png"
+            )
             sys.exit(1)
 
     print(f"Found {len(photo_paths)} photos:")
@@ -166,7 +172,7 @@ def main():
     results = generate_all_composites(
         photo_paths=photo_paths,
         output_dir=args.output_dir,
-        output_prefix=args.output_prefix
+        output_prefix=args.output_prefix,
     )
 
     print("\n📂 Output files:")

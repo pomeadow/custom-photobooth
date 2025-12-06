@@ -36,9 +36,6 @@ class SessionManager:
     def set_num_photos(self, num_photos: int):
         self._num_photos = num_photos
 
-    def set_template_num_photos(self, template_num_photos: int):
-        self._template_num_photos = template_num_photos
-    
     @property
     def get_current_session_folder(self):
         return self._current_session_folder

@@ -184,8 +184,9 @@ class ImageProcessor(QObject):
         result = template.copy()
 
         # Insert each photo into its slot
-        for i in range(num_photos_needed):
-            photo_path = photo_paths[i]
+        for i in range(len(slots)):
+            # 0 % 3 = 0, 1 % 3 = 1, 2 % 3 = 2
+            photo_path = photo_paths[i % len(photo_paths)]
             slot_x, slot_y, slot_w, slot_h = slots[i]
 
             # Load photo

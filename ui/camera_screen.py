@@ -51,7 +51,7 @@ class CameraScreen(BaseScreen):
         self.photos_taken = 0
         self._update_counter()
         if self.camera_controller.start_camera():
-            self.countdown.start(5)  # Start 20 second countdown
+            self.countdown.start(1)  # Start 20 second countdown
         else:
             self.timer_label.setText("Camera Error")
 
@@ -180,7 +180,7 @@ class CameraScreen(BaseScreen):
             self.navigate_to.emit("selection")
         else:
             # Only restart 20 seconds countdown if we still have photos to take
-            self.countdown.start(5)
+            self.countdown.start(1)
 
     def _on_frame_combo_changed(self, index):
         print(f"Selected item index: {index}")
