@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from re import S
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
@@ -49,6 +50,8 @@ class SelectionScreen(BaseScreen):
             print("No session folder found")
         self.current_page = 0
         self.update_image_grid()
+        self._update_preview_strip()
+        self._cleanup_old_previews()
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -70,18 +73,7 @@ class SelectionScreen(BaseScreen):
         top_nav_layout.addWidget(self.page_label)
         # top_nav_layout.addWidget(self.next_button_nav)
 
-        bottom_nav_layout = QHBoxLayout()
-        label_instructions = QLabel("Select min 2, max 3 photos")
-        label_instructions.setStyleSheet("font-size: 48px; color: blue;")
-        print_button = QPushButton("Next")
-        print_button.clicked.connect(self._cleanup_and_move_to_print)
-        print_button.setStyleSheet(buttons_css)
-        bottom_nav_layout.addWidget(label_instructions)
-        bottom_nav_layout.addWidget(print_button)
-
-        # Grid for images
-        self.grid_widget = QWidget()
-        self.grid_layout = QGridLayout(self.grid_widget)
+        middle_layout = QHBoxLayout()
 
         # Preview area for strips
         self.preview_widget = QWidget()
@@ -94,15 +86,43 @@ class SelectionScreen(BaseScreen):
         self.preview_label.setVisible(False)
 
         self.preview_strip_label = QLabel()
+        self.preview_strip_label.setFixedSize(480, 640)
         self.preview_strip_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview_strip_label.setVisible(False)
 
         self.preview_layout.addWidget(self.preview_label)
         self.preview_layout.addWidget(self.preview_strip_label)
+        self.preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Grid for images
+        self.grid_widget = QWidget()
+        self.grid_layout = QGridLayout(self.grid_widget)
+
+        middle_layout.addWidget(self.preview_widget)
+        middle_layout.addWidget(self.grid_widget)
+
+        bottom_nav_layout = QHBoxLayout()
+        label_instructions = QLabel("Select min 2, max 3 photos")
+        label_instructions.setStyleSheet("""
+            font-size: 48px; 
+            font-weight: bold;
+            color: #FF0000;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            background-color: rgba(255, 255, 0, 0.3);
+            border-radius: 50%;
+            padding: 30px;
+        """)
+
+        self.print_button = QPushButton("Next")
+        self.print_button.clicked.connect(lambda: self.navigate_to.emit("print"))
+        self.print_button.setStyleSheet(buttons_css)
+        self.print_button.setEnabled(False)
+
+        bottom_nav_layout.addWidget(label_instructions)
+        bottom_nav_layout.addWidget(self.print_button)
 
         main_layout.addLayout(top_nav_layout)
-        main_layout.addWidget(self.grid_widget)
-        main_layout.addWidget(self.preview_widget)
+        main_layout.addLayout(middle_layout)
         main_layout.addLayout(bottom_nav_layout)
 
         # Load first page
@@ -207,22 +227,45 @@ class SelectionScreen(BaseScreen):
 
         print(f"Selected photos: {len(self.selected_photos)} - {self.selected_photos}")
 
+        # Update clickability of all labels
+        # self._update_label_clickability()
+
         # Update preview strip when 2 or 3 photos are selected
         self._update_preview_strip()
+
+    def _update_label_clickability(self):
+        """Enable/disable labels based on selection count."""
+        num_selected = len(self.selected_photos)
+
+        for path, label in self.selected_labels.items():
+            if path in self.selected_photos:
+                # Always allow deselecting selected photos
+                label.set_clickable(True)
+            elif num_selected >= 3:
+                # Disable unselected labels when 3 are already selected
+                label.set_clickable(False)
+                label.setStyleSheet("border: 2px solid #ccc; opacity: 0.5;")
+            else:
+                # Enable unselected labels when less than 3 are selected
+                label.set_clickable(True)
+                label.setStyleSheet("border: 2px solid #ccc;")
 
     def _update_preview_strip(self):
         """Generate and display preview strip based on number of selected photos."""
         num_selected = len(self.selected_photos)
 
-        # Only show preview for 2 or 3 selected photos
-        if num_selected in [2, 3] and self.current_session_folder:
+        # Only show preview for 1 or more selected photos
+        if num_selected in [1, 2, 3, 4] and self.current_session_folder:
             # Map number of photos to template configuration
-            if num_selected == 3:
-                selected_template_index = 0  # templateup4 (2x3 grid)
-                selected_template_path = "./resources/templates/v0.1/templateup4.png"
-            elif num_selected == 2:
+            # if num_selected == 3:
+            #     selected_template_index = 0  # templateup4 (2x3 grid)
+            #     selected_template_path = "./resources/templates/v0.1/templateup4.png"
+            if num_selected == 1 or num_selected == 2:
                 selected_template_index = 3  # templateup3 (2x2 grid)
                 selected_template_path = "./resources/templates/v0.1/templateup3.png"
+            elif num_selected == 4:
+                selected_template_index = 1  # templateup1 (2x4 grid)
+                selected_template_path = "./resources/templates/v0.1/templateup1.png"
 
             # Generate preview strip
             strip_path = generate_preview_strip(
@@ -238,8 +281,10 @@ class SelectionScreen(BaseScreen):
                 # Load and display the preview strip
                 pixmap = QPixmap(strip_path)
                 # Scale to reasonable size (e.g., 600px wide)
-                scaled_pixmap = pixmap.scaledToWidth(
-                    600, Qt.TransformationMode.SmoothTransformation
+                scaled_pixmap = pixmap.scaled(
+                    self.preview_strip_label.size(),
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
                 )
                 self.preview_strip_label.setPixmap(scaled_pixmap)
                 self.preview_strip_label.setVisible(True)
@@ -251,6 +296,7 @@ class SelectionScreen(BaseScreen):
                 self.layout_selected.emit(
                     selected_template_path, num_selected, selected_template_index
                 )
+                self.print_button.setEnabled(True)
 
             else:
                 print(f"Failed to generate preview strip for {num_selected} photos")
@@ -261,16 +307,27 @@ class SelectionScreen(BaseScreen):
             self.selected_template_index = None
             self.selected_template_path = None
 
+            # selected_template_index = 3
+            # selected_template_path = "./resources/templates/v0.1/templateup3.png"
+            # # Load and display the EMPTY preview strip
+            # pixmap = QPixmap(selected_template_path)
+            # scaled_pixmap = pixmap.scaled(
+            #     self.preview_strip_label.size(),
+            #     Qt.AspectRatioMode.KeepAspectRatio,
+            #     Qt.TransformationMode.SmoothTransformation,
+            # )
+            # self.preview_strip_label.setPixmap(scaled_pixmap)
+            # self.preview_strip_label.setVisible(True)
+            # self.preview_label.setVisible(True)
+
     def _hide_preview_strip(self):
         """Hide the preview strip."""
         self.preview_strip_label.setVisible(False)
         self.preview_label.setVisible(False)
 
-    def _cleanup_and_move_to_print(self):
-        try: 
+    def _cleanup_old_previews(self):
+        try:
             for p in self.preview_strip_paths.values():
                 os.remove(p)
         except:
-            pass # expect that the path might not always exists
-            
-        self.navigate_to.emit("print")
+            pass  # expect that the path might not always exists

@@ -55,7 +55,7 @@ def generate_all_composites(photo_paths, output_dir=None, output_prefix="composi
         # Get the template file path
         template_files = {
             0: "./resources/templates/v0.1/templateup4.png",  # 2x3, 6 photos
-            1: "./resources/templates/templateup1.png",  # 1x4, 4 photos
+            1: "./resources/templates/templateup1.png",  # 2x4, 4 photos
             2: "./resources/templates/templateup2.png",  # 1x3, 3 photos
             3: "./resources/templates/v0.1/templateup3.png",  # 2x2, 4 photos
         }

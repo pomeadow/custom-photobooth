@@ -27,19 +27,20 @@ def generate_preview_strip(
         return None
 
     os.makedirs(output_dir, exist_ok=True)
+    print(f"Photo paths - debug {photo_paths}")
 
     # Map number of photos to template configuration
     # For 3 photos: use template 2 (1x3 horizontal layout)
     # For 2 photos: we need to create a 2x1 variant or use existing template
 
-    if num_photos == 3:
-        template_index = 0  # templateup4 - 2x3 grid, we'll take top row
-        template_path = "./resources/templates/v0.1/templateup4.png"
+    if num_photos == 4:
+        template_index = 1  # templateup1 - 2x4 grid, we'll take top row
+        template_path = "./resources/templates/v0.1/templateup1.png"
     elif num_photos == 2:
         template_index = 3  # templateup3 - 2x2 grid, we'll take left column
         template_path = "./resources/templates/v0.1/templateup3.png"
     else:
-        print(f"Preview strips only supported for 2 or 3 photos, got {num_photos}")
+        print(f"Preview strips only supported for 2 or 4 photos, got {num_photos}")
         return None
 
     if not os.path.exists(template_path):
@@ -63,7 +64,7 @@ def generate_preview_strip(
         if num_photos == 2 and template_index == 3:
             # Duplicate photos: [photo1, photo2, photo1, photo2]
             photos_for_composite = photo_paths + photo_paths
-        elif num_photos == 3 and template_index == 0:
+        elif num_photos == 4 and template_index == 1:
             # Duplicate photos: [photo1, photo2, photo3, photo1, photo2, photo3]
             photos_for_composite = photo_paths + photo_paths
         else:
@@ -77,16 +78,15 @@ def generate_preview_strip(
         )
 
         # Crop the composite based on template type
-        if template_index == 3:
-            # templateup3 (2x2): take left column (left half)
+        if template_index == 3 or template_index == 1:
+            # templateup3 (2x2) and templateup4 (3x2): take left column (left half)
             height, width = composite.shape[:2]
             half_width = width // 2
             composite_half = composite[:, :half_width].copy()
-        elif template_index == 0:
-            # templateup4 (2x3): take top row (top half)
-            height, width = composite.shape[:2]
-            half_height = height // 2
-            composite_half = composite[:half_height, :].copy()
+        # elif template_index == 3:
+        #     height, width = composite.shape[:2]
+        #     half_height = height // 2
+        #     composite_half = composite[:half_height, :].copy()
         else:
             composite_half = composite
 
@@ -104,39 +104,3 @@ def generate_preview_strip(
 
         traceback.print_exc()
         return None
-
-
-# def generate_all_preview_strips(photo_paths, output_dir):
-#     """
-#     Generate preview strips for 2 and 3 photo configurations.
-
-#     Args:
-#         photo_paths: List of paths to photos (must have at least 3 photos)
-#         output_dir: Directory to save preview strips
-
-#     Returns:
-#         dict: Dictionary mapping num_photos to output path {2: path, 3: path}
-#     """
-#     results = {}
-
-#     if len(photo_paths) >= 2:
-#         strip_2 = generate_preview_strip(
-#             photo_paths[:2],
-#             num_photos=2,
-#             output_dir=output_dir,
-#             output_prefix="preview_strip"
-#         )
-#         if strip_2:
-#             results[2] = strip_2
-
-#     if len(photo_paths) >= 3:
-#         strip_3 = generate_preview_strip(
-#             photo_paths[:3],
-#             num_photos=3,
-#             output_dir=output_dir,
-#             output_prefix="preview_strip"
-#         )
-#         if strip_3:
-#             results[3] = strip_3
-
-#     return results

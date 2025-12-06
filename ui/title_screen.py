@@ -47,7 +47,7 @@ class TitleScreen(BaseScreen):
 
         # Start button
         start_photobooth_button = QPushButton("Start")
-        start_photobooth_button.setFont(QFont("Arial", 18))
+        start_photobooth_button.setFont(QFont("Impact", 48, QFont.Weight.Bold))
         start_photobooth_button.setStyleSheet("""
             QPushButton {
                 background-color: #d42c2c;

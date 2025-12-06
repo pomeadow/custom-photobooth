@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSpinBox,
     QVBoxLayout,
+    QWidget,
 )
 from components.countdown_timer import CountdownTimer
 from components.flash_overlay import FlashOverlay
@@ -66,18 +67,11 @@ class CameraScreen(BaseScreen):
 
     def _setup_ui(self):
         # Main layout
-        main_layout = QHBoxLayout(self)
+        main_layout = QVBoxLayout(self)
 
-        # Left panel for controls
-        left_panel = QVBoxLayout()
-        # Frame selector (placeholder for now)
-        frame_label = QLabel("Frame:")
-        self.frame_combo = QComboBox()
-        self.frame_combo.addItems(
-            ["Default Frame", "Heart Frame", "Star Frame", "Frame 3", "Frame 4"]
-        )
-        self.frame_combo.setStyleSheet("color: red;")
-        self.frame_combo.currentIndexChanged.connect(self._on_frame_combo_changed)
+        # Top panel for controls
+        top_panel = QHBoxLayout()
+        top_panel.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # Control buttons
         self.back_button = QPushButton("← Back to Title")
@@ -97,39 +91,51 @@ class CameraScreen(BaseScreen):
         # Photo counter
         self.counter_label = QLabel()
         self.counter_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.counter_label.setStyleSheet("font-size: 48px; color: blue;")
+        self.counter_label.setStyleSheet("""
+            font-size: 64px; 
+            font-weight: bold;
+            color: #FF1493;  /* Hot pink */
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 20px;
+            border: 5px solid #FFD700;
+        """)
         self._update_counter()
 
         self.timer_label = QLabel()
         self.timer_label.setMinimumSize(100, 50)
         self.timer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.timer_label.setStyleSheet("font-size: 48px; color: blue;")
+        self.timer_label.setStyleSheet("""
+            font-size: 120px; 
+            font-weight: bold;
+            color: #FF0000;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            background-color: rgba(255, 255, 0, 0.3);
+            border-radius: 50%;
+            padding: 30px;
+        """)
 
-        # Add to left panel
-        left_panel.addWidget(self.back_button)
-        left_panel.addWidget(self.counter_label)
-        if os.getenv("VERSION") == "0.0":
-            left_panel.addWidget(frame_label)
-            left_panel.addWidget(self.frame_combo)
+        # Add to top panel
+        top_panel.addWidget(self.back_button, 1)
+        top_panel.addWidget(self.counter_label, 2)
 
-        # left_panel.addWidget(self.capture_button)
+        # top_panel.addWidget(self.capture_button)
+        top_panel.addWidget(self.timer_label, 2)
+        top_panel.addWidget(self.next_button, 1)
 
-        left_panel.addWidget(self.next_button)
-        left_panel.addWidget(self.timer_label)
-        # TODO set fixed size for left panel
-        # left_panel_widget.setFixedWidth(200)
+        # TODO set fixed size for top panel
 
         # Right panel for camera preview
         self.camera_label = QLabel()
         self.camera_label.setMinimumSize(640, 480)
-        self.camera_label.setStyleSheet("border: 1px solid black")
         self.camera_label.setText("Camera preview will appear here")
         self.camera_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.flash = FlashOverlay(self.camera_label)
 
         # Add to main layout
-        main_layout.addLayout(left_panel, 0)  # 0 = no stretch
+        main_layout.addLayout(top_panel, 0)  # 0 = no stretch
         main_layout.addWidget(self.camera_label, 1)  # 1 = takes remaining space
 
     def _connect_signals(self):

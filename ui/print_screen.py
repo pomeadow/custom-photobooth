@@ -7,6 +7,7 @@ from controllers.session_manager import SessionManager
 from ui.base_screen import BaseScreen
 from ui.styles import buttons_css
 import cv2 as cv
+from python_parallel_print import mock_printer
 
 
 class PrintScreen(BaseScreen):
@@ -17,6 +18,7 @@ class PrintScreen(BaseScreen):
         self._image_processor = image_processor
         self._session_manager = session_manager
         self._composite_image = None
+        self.printer = mock_printer.MockPrinter()
         self._setup_ui()
 
     def _setup_ui(self):
@@ -129,3 +131,4 @@ class PrintScreen(BaseScreen):
 
         # TODO: Add actual printing logic here
         print("Sending to printer...")
+        self.printer.print_images(output_path)
