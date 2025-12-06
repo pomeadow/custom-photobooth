@@ -1,8 +1,8 @@
-numpy==1.24.4
+numpy==2.2.6
 opencv-python==4.12.0.88
-pillow==10.4.0
-PySide6==6.6.3.1
-PySide6_Addons==6.6.3.1
-PySide6_Essentials==6.6.3.1
-ruff==0.13.3
-shiboken6==6.6.3.1
+pillow==12.0.0
+PySide6==6.10.1
+PySide6_Addons==6.10.1
+PySide6_Essentials==6.10.1
+ruff==0.14.8
+shiboken6==6.10.1
