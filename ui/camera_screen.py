@@ -1,16 +1,12 @@
-from email.mime import image
 import os
 from typing import List
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QComboBox,
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QSpinBox,
     QVBoxLayout,
-    QWidget,
 )
 from components.countdown_timer import CountdownTimer
 from components.flash_overlay import FlashOverlay
@@ -32,12 +28,14 @@ class CameraScreen(BaseScreen):
         image_processor: ImageProcessor,
         session_manager: SessionManager,
         frame_options: List[str],
+        camera_index: int = 0,
         parent=None,
     ):
         super().__init__(parent)
         self.camera_controller = camera_controller
         self.image_processor = image_processor
         self.session_manager = session_manager
+        self.camera_index = camera_index
         self.photos_to_take = 1
         self.photos_taken = 0
         self.countdown = CountdownTimer()
@@ -51,9 +49,15 @@ class CameraScreen(BaseScreen):
         print(f"CameraScreen.on_enter() called. photos_to_take={self.photos_to_take}")
         self.photos_taken = 0
         self._update_counter()
-        if self.camera_controller.start_camera():
+
+        # Show loading overlay while camera initializes
+        self.loading_overlay.show()
+        self.loading_overlay.raise_()  # Bring to front
+
+        if self.camera_controller.start_camera(self.camera_index):
             self.countdown.start(1)  # Start 20 second countdown
         else:
+            self.loading_overlay.hide()
             self.timer_label.setText("Camera Error")
 
     def on_exit(self):
@@ -134,14 +138,29 @@ class CameraScreen(BaseScreen):
 
         self.flash = FlashOverlay(self.camera_label)
 
+        # Loading overlay for camera initialization
+        self.loading_overlay = QLabel("Initializing camera...")
+        self.loading_overlay.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.loading_overlay.setStyleSheet("""
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFFFFF;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+        """)
+        self.loading_overlay.hide()
+
         # Add to main layout
         main_layout.addLayout(top_panel, 0)  # 0 = no stretch
         main_layout.addWidget(self.camera_label, 1)  # 1 = takes remaining space
+        main_layout.addWidget(self.loading_overlay, 1)  # Overlay on top
 
     def _connect_signals(self):
         """Connect all signals."""
         # Camera signals
         self.camera_controller.frame_ready.connect(self._on_camera_frame)
+        self.camera_controller.camera_ready.connect(self._on_camera_ready)
 
         # Countdown signals
         self.countdown.tick.connect(self._on_countdown_tick)
@@ -161,6 +180,10 @@ class CameraScreen(BaseScreen):
             target_size=(self.camera_label.width(), self.camera_label.height()),
         )
         self.camera_label.setPixmap(pixmap)
+
+    def _on_camera_ready(self):
+        """Called when camera has finished initialization and skipped startup frames."""
+        self.loading_overlay.hide()
 
     def _capture_photo(self):
         frame = self.camera_controller.capture_photo()

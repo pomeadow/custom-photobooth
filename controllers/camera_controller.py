@@ -8,6 +8,7 @@ class CameraController(QObject):
     camera_started = Signal()
     camera_stopped = Signal()
     camera_error = Signal(str)  # Emit error messages
+    camera_ready = Signal()  # Emit when startup frames are skipped
 
     def __init__(self) -> None:
         super().__init__()
@@ -15,11 +16,19 @@ class CameraController(QObject):
         self._timer = QTimer()
         self._fps = 30
         self._is_running = False
+        self._frames_to_skip = 10  # Skip first N frames to hide startup logo
+        self._frame_count = 0
+        self._ready_emitted = False
 
-    def start_camera(self):
-        self._camera = cv.VideoCapture(0)
+    def start_camera(self, camera_index: int = 0):
+        self._camera = cv.VideoCapture(camera_index)
         if self._is_running:
             return True
+
+        # Reset frame counter for new camera session
+        self._frame_count = 0
+        self._ready_emitted = False
+
         self._timer.start(30)  # Update every 30ms
         self._timer.timeout.connect(self._update_frame)
         self._is_running = True
@@ -49,6 +58,15 @@ class CameraController(QObject):
             return
         ret, frame = self._camera.read()
         if ret:
+            # Skip initial frames to hide camera startup logo
+            if self._frame_count < self._frames_to_skip:
+                self._frame_count += 1
+                # Emit camera_ready signal once when ready
+                if self._frame_count == self._frames_to_skip and not self._ready_emitted:
+                    self._ready_emitted = True
+                    self.camera_ready.emit()
+                return
+
             self.frame_ready.emit(frame)
         else:
             self.camera_error.emit("Failed to read frame")

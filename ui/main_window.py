@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
 from controllers.camera_controller import CameraController
@@ -8,6 +9,9 @@ from ui.camera_screen import CameraScreen
 from ui.print_screen import PrintScreen
 from ui.selection_screen import SelectionScreen
 from ui.title_screen import TitleScreen
+
+# Load environment variables
+load_dotenv()
 
 
 class PhotoboothGUI(QMainWindow):
@@ -22,6 +26,7 @@ class PhotoboothGUI(QMainWindow):
         # Initialize camera
         base_dir = os.getcwd()
         self._camera_controller = CameraController()
+        self._camera_index = int(os.getenv("CAMERA_INDEX", "0"))
         self._session_manager = SessionManager(base_dir=base_dir)
         self._image_processor = ImageProcessor()
 
@@ -49,6 +54,7 @@ class PhotoboothGUI(QMainWindow):
                 "./resources/frames/3.png",
                 "./resources/frames/christmas-frame3.png",
             ],
+            camera_index=self._camera_index,
         )
         self.selection_screen = SelectionScreen(session_manager=self._session_manager)
         self.print_screen = PrintScreen(

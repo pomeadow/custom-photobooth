@@ -1,7 +1,7 @@
 import os
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QFont, QPixmap
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
 from controllers.image_processor import ImageProcessor
 from controllers.session_manager import SessionManager
 from ui.base_screen import BaseScreen
@@ -61,6 +61,18 @@ class PrintScreen(BaseScreen):
         print_button.setStyleSheet(buttons_css)
         print_button.clicked.connect(self._on_print_clicked)
 
+        # Popup label
+        self.popup_dialog = QDialog()
+        popup_layout = QVBoxLayout(self.popup_dialog)
+        self.popup_dialog.setGeometry(QRect(100, 100, 400, 200))
+        
+        popup_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        popup_message = QLabel()
+        popup_message.setText("Sent to print")
+        popup_message.setFont(QFont("Arial", 16))
+        popup_message.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+
         # Start over button
         start_over_button = QPushButton("Start Over")
         start_over_button.setFont(QFont("Arial", 16))
@@ -72,6 +84,7 @@ class PrintScreen(BaseScreen):
         button_layout.addWidget(start_over_button)
 
         main_layout.addLayout(button_layout)
+        main_layout.addLayout(popup_layout)
 
         self.setLayout(main_layout)
 
@@ -131,4 +144,5 @@ class PrintScreen(BaseScreen):
 
         # TODO: Add actual printing logic here
         print("Sending to printer...")
+        self.popup_dialog.show()
         self.printer.print_images(output_path)
