@@ -41,7 +41,12 @@ class SelectionScreen(BaseScreen):
         self.current_session_folder = self.session_manager.get_current_session_folder
         # Load images from current session folder
         if self.current_session_folder and os.path.exists(self.current_session_folder):
-            self.all_image_paths = get_png_file_paths(self.current_session_folder)
+            all_pngs = get_png_file_paths(self.current_session_folder)
+            # Filter out preview strips and composite files, keep only photos
+            self.all_image_paths = [
+                 p for p in all_pngs
+                   if p and 'preview_strip' not in p and 'composite' not in p
+               ]
             print(
                 f"Loaded {len(self.all_image_paths)} images from {self.current_session_folder}"
             )
@@ -49,9 +54,13 @@ class SelectionScreen(BaseScreen):
             self.all_image_paths = []
             print("No session folder found")
         self.current_page = 0
-        self.update_image_grid()
-        self._update_preview_strip()
         self._cleanup_old_previews()
+        self._update_preview_strip()
+        self.update_image_grid()
+    
+    def reset(self):
+        self.selected_photos = []
+        self.selected_labels = {}
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -102,7 +111,8 @@ class SelectionScreen(BaseScreen):
         middle_layout.addWidget(self.grid_widget)
 
         bottom_nav_layout = QHBoxLayout()
-        label_instructions = QLabel("Select min 2, max 3 photos")
+        label_instructions = QLabel("Select 2 or all 4 photos")
+        label_instructions.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label_instructions.setStyleSheet("""
             font-size: 48px; 
             font-weight: bold;
@@ -155,6 +165,10 @@ class SelectionScreen(BaseScreen):
         rows = 2
         cols = 2
         for i, path in enumerate(current_paths):
+            # Skip empty or invalid paths
+            if not path or not os.path.exists(path):
+                continue
+
             row = i // cols
             col = i % cols
 

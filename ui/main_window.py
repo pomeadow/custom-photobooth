@@ -93,6 +93,11 @@ class PhotoboothGUI(QMainWindow):
         if hasattr(current_widget, "on_exit"):
             current_widget.on_exit()  # type: ignore
 
+        if screen_name == "title":
+            self._session_manager.reset_session()
+            self.camera_screen.reset()
+            self.selection_screen.reset()
+
         # Special handling for print screen - generate composite
         if screen_name == "print":
             selected_photos = self.selection_screen.selected_photos

@@ -47,15 +47,12 @@ class CameraScreen(BaseScreen):
     def on_enter(self):
         """Called when screen becomes active."""
         print(f"CameraScreen.on_enter() called. photos_to_take={self.photos_to_take}")
-        self.photos_taken = 0
-        self._update_counter()
-
         # Show loading overlay while camera initializes
         self.loading_overlay.show()
         self.loading_overlay.raise_()  # Bring to front
 
         if self.camera_controller.start_camera(self.camera_index):
-            self.countdown.start(1)  # Start 20 second countdown
+            self.countdown.start(10)  # Start 20 second countdown
         else:
             self.loading_overlay.hide()
             self.timer_label.setText("Camera Error")
@@ -65,9 +62,9 @@ class CameraScreen(BaseScreen):
         self.camera_controller.stop_camera()
         self.countdown.stop()
 
-    def cleanup(self):
-        """Called when screen is being destroyed."""
-        pass
+    def reset(self):
+        self.photos_taken = 0
+        self._update_counter()
 
     def _setup_ui(self):
         # Main layout
@@ -111,7 +108,7 @@ class CameraScreen(BaseScreen):
         self.timer_label.setMinimumSize(100, 50)
         self.timer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.timer_label.setStyleSheet("""
-            font-size: 120px; 
+            font-size: 64px; 
             font-weight: bold;
             color: #FF0000;
             font-family: 'Impact', 'Arial Black', sans-serif;
@@ -209,7 +206,7 @@ class CameraScreen(BaseScreen):
             self.navigate_to.emit("selection")
         else:
             # Only restart 20 seconds countdown if we still have photos to take
-            self.countdown.start(1)
+            self.countdown.start(10)
 
     def _on_frame_combo_changed(self, index):
         print(f"Selected item index: {index}")

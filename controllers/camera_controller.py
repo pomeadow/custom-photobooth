@@ -62,7 +62,10 @@ class CameraController(QObject):
             if self._frame_count < self._frames_to_skip:
                 self._frame_count += 1
                 # Emit camera_ready signal once when ready
-                if self._frame_count == self._frames_to_skip and not self._ready_emitted:
+                if (
+                    self._frame_count == self._frames_to_skip
+                    and not self._ready_emitted
+                ):
                     self._ready_emitted = True
                     self.camera_ready.emit()
                 return

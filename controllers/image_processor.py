@@ -166,7 +166,6 @@ class ImageProcessor(QObject):
 
         # Get template dimensions
         template_height, template_width = template.shape[:2]
-        print("Template ", template_height, template_width)
 
         # Define photo slot positions for each template (x, y, width, height)
         # These are approximate positions based on the visual inspection of templates

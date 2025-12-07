@@ -1,7 +1,15 @@
 import os
 from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QFont, QPixmap
-from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QLayout, QPushButton, QVBoxLayout
+from PySide6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QLayout,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+)
 from controllers.image_processor import ImageProcessor
 from controllers.session_manager import SessionManager
 from ui.base_screen import BaseScreen
@@ -61,17 +69,26 @@ class PrintScreen(BaseScreen):
         print_button.setStyleSheet(buttons_css)
         print_button.clicked.connect(self._on_print_clicked)
 
-        # Popup label
-        self.popup_dialog = QDialog()
-        popup_layout = QVBoxLayout(self.popup_dialog)
+        # Popup dialog
+        self.popup_dialog = QDialog(self)
+        self.popup_dialog.setWindowTitle("Print Status")
+        self.popup_dialog.setModal(True)  # Make it modal (blocks other interactions)
         self.popup_dialog.setGeometry(QRect(100, 100, 400, 200))
-        
+
+        popup_layout = QVBoxLayout(self.popup_dialog)
         popup_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        popup_message = QLabel()
-        popup_message.setText("Sent to print")
+
+        popup_message = QLabel("Sent to print")
         popup_message.setFont(QFont("Arial", 16))
         popup_message.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        popup_layout.addWidget(popup_message)  # Add the label to the layout
 
+        # Optional: Add a close button
+        close_button = QPushButton("OK")
+        close_button.setFont(QFont("Arial", 14))
+        close_button.setStyleSheet(buttons_css)
+        close_button.clicked.connect(self.popup_dialog.close)
+        popup_layout.addWidget(close_button)
 
         # Start over button
         start_over_button = QPushButton("Start Over")
@@ -84,7 +101,6 @@ class PrintScreen(BaseScreen):
         button_layout.addWidget(start_over_button)
 
         main_layout.addLayout(button_layout)
-        main_layout.addLayout(popup_layout)
 
         self.setLayout(main_layout)
 
