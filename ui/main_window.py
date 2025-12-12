@@ -42,18 +42,11 @@ class PhotoboothGUI(QMainWindow):
         self.stacked_widget.setStyleSheet("background-color: #ffffff;")
         self.setCentralWidget(self.stacked_widget)
 
-        # Create title screen
         self.title_screen = TitleScreen()
         self.camera_screen = CameraScreen(
             camera_controller=self._camera_controller,
             image_processor=self._image_processor,
             session_manager=self._session_manager,
-            frame_options=[
-                self.DEFAULT_OVERLAY_PATH,
-                "./resources/frames/christmas-frame1.png",
-                "./resources/frames/3.png",
-                "./resources/frames/christmas-frame3.png",
-            ],
             camera_index=self._camera_index,
         )
         self.selection_screen = SelectionScreen(session_manager=self._session_manager)
@@ -72,8 +65,6 @@ class PhotoboothGUI(QMainWindow):
         self.selection_screen.navigate_to.connect(self.navigate_to_screen)
         self.print_screen.navigate_to.connect(self.navigate_to_screen)
 
-        self.camera_screen.session_complete.connect(self._on_session_complete)
-
         # Connect this method to the same method if layout screen if not active
         self.title_screen.create_session_signal.connect(
             self._on_skip_layout_create_session
@@ -84,6 +75,9 @@ class PhotoboothGUI(QMainWindow):
         # Start with title screen
         self.navigate_to_screen("title")
         self.stacked_widget.setCurrentIndex(0)
+
+        # Start camera immediately - stop in on_exit of main window
+        self._camera_controller.start_camera(self._camera_index)
 
     def navigate_to_screen(self, screen_name: str):
         screen_map = {"title": 0, "camera": 1, "selection": 2, "print": 3}
@@ -121,12 +115,14 @@ class PhotoboothGUI(QMainWindow):
         layout_path: str,
         num_photos: int,
         template_index: int,
+        preview_path: str,
     ):
         """Handle layout selection."""
         # Update the current session with selected template info
         self._session_manager.set_template_path(layout_path)
         self._session_manager.set_template_index(template_index)
         self._session_manager.set_num_photos(num_photos)
+        self._session_manager.set_preview(preview_path)
 
     def _on_skip_layout_create_session(self):
         # Configure camera screen
@@ -138,20 +134,9 @@ class PhotoboothGUI(QMainWindow):
         # Navigate to camera
         self.navigate_to_screen("camera")
 
-    def _on_session_complete(self):
-        """Handle photo session completion."""
-        # Could show completion message, play sound, etc.
-        if self._session_manager.template_info is None:
-            raise ValueError("Should not happen")
-        if self._session_manager.template_info[0] is None:
-            raise ValueError("Should not happen")
-        self._image_processor.load_overlay(self._session_manager.template_info[0])
-        pass
-
     def _on_session_continued(self):
-        # Could show completion message, play sound, etc.
         if self._session_manager.template_info is None:
-            raise ValueError("Should not happen")
+            raise ValueError("Unable to obtion template info from session manager")
         pass
 
     def closeEvent(self, event):

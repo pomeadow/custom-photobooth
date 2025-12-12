@@ -16,9 +16,11 @@ class TitleScreen(BaseScreen):
         title_layout = QVBoxLayout(self)
         title_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # pixmap = QPixmap("./resources/page1.jpg")
         pixmap = QPixmap("./resources/title.jpg")
         image_label = QLabel()
         image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # image_label.setMinimumSize(800, 600)
         image_label.setFixedSize(800, 600)
 
         scaledPixmap = pixmap.scaled(
@@ -27,23 +29,6 @@ class TitleScreen(BaseScreen):
             Qt.TransformationMode.SmoothTransformation,
         )
         image_label.setPixmap(scaledPixmap)
-
-        # Title label
-        # title_label = QLabel("🎄 Merry Christmas!! 🎄")
-        # title_font = QFont()
-        # title_font.setPointSize(36)
-        # title_font.setBold(True)
-        # title_label.setFont(title_font)
-        # title_label.setAlignment(Qt.AlignCenter)
-        # title_label.setStyleSheet("color: #d42c2c; margin: 50px;")
-
-        # # Subtitle
-        # subtitle_label = QLabel("Welcome to our Christmas Photobooth!")
-        # subtitle_font = QFont()
-        # subtitle_font.setPointSize(16)
-        # subtitle_label.setFont(subtitle_font)
-        # subtitle_label.setAlignment(Qt.AlignCenter)
-        # subtitle_label.setStyleSheet("color: #2d5a2d; margin: 20px;")
 
         # Start button
         start_photobooth_button = QPushButton("Start")

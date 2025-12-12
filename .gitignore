@@ -2,7 +2,11 @@
 .ruff_cache
 .vscode
 scratch.py
+__pycache__/
+*.log
+
 
 # local
 session_*/
 photos*/
+ui/__pycache__/camera_screen.cpython-312.pyc

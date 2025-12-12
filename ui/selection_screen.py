@@ -27,9 +27,10 @@ class SelectionScreen(BaseScreen):
         layout_path: str,
         num_photos: int,
         template_index: int
+        preview_path: str
     """
 
-    layout_selected = Signal(str, int, int)
+    layout_selected = Signal(str, int, int, str)
 
     def __init__(self, session_manager: SessionManager, parent=None):
         super().__init__(parent)
@@ -44,9 +45,10 @@ class SelectionScreen(BaseScreen):
             all_pngs = get_png_file_paths(self.current_session_folder)
             # Filter out preview strips and composite files, keep only photos
             self.all_image_paths = [
-                 p for p in all_pngs
-                   if p and 'preview_strip' not in p and 'composite' not in p
-               ]
+                p
+                for p in all_pngs
+                if p and "preview_strip" not in p and "composite" not in p
+            ]
             print(
                 f"Loaded {len(self.all_image_paths)} images from {self.current_session_folder}"
             )
@@ -57,7 +59,7 @@ class SelectionScreen(BaseScreen):
         self._cleanup_old_previews()
         self._update_preview_strip()
         self.update_image_grid()
-    
+
     def reset(self):
         self.selected_photos = []
         self.selected_labels = {}
@@ -103,6 +105,7 @@ class SelectionScreen(BaseScreen):
         self.preview_layout.addWidget(self.preview_strip_label)
         self.preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # TODO adjust the grid so that it is centered before preview shows at the side
         # Grid for images
         self.grid_widget = QWidget()
         self.grid_layout = QGridLayout(self.grid_widget)
@@ -308,7 +311,10 @@ class SelectionScreen(BaseScreen):
                     f"Selected template: index={selected_template_index}, path={selected_template_path}"
                 )
                 self.layout_selected.emit(
-                    selected_template_path, num_selected, selected_template_index
+                    selected_template_path,
+                    num_selected,
+                    selected_template_index,
+                    strip_path,
                 )
                 self.print_button.setEnabled(True)
 

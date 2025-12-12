@@ -12,6 +12,7 @@ class SessionManager:
         self._template_path = None
         self._template_index = None
         self._num_photos = None
+        self._preview_path = None
 
     def create_session(self, template_path: str, template_index: int, num_photos):
         """Create new session folder and properties"""
@@ -37,6 +38,9 @@ class SessionManager:
     def set_num_photos(self, num_photos: int):
         self._num_photos = num_photos
 
+    def set_preview(self, preview_path):
+        self._preview_path = preview_path
+
     @property
     def get_current_session_folder(self):
         return self._current_session_folder
@@ -49,7 +53,12 @@ class SessionManager:
     @property
     def template_info(self):
         """Get path of templates and index selected"""
-        return self._template_path, self._template_index, self._num_photos
+        return (
+            self._template_path,
+            self._template_index,
+            self._num_photos,
+            self._preview_path,
+        )
 
     def reset_session(self):
         """Reset the session."""
@@ -58,6 +67,7 @@ class SessionManager:
         self._num_photos = None
         self._template_path = None
         self._template_index = None
+        self._preview_path = None
 
     def close_session(self):
         """Close the current session."""
@@ -65,6 +75,7 @@ class SessionManager:
         self._photo_count = 0
         self._template_path = None
         self._template_index = None
+        self._preview_path = None
 
     def save_photo(self, frame):
         # Save the captured image to current session folder

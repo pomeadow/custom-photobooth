@@ -32,17 +32,14 @@ class RangeSelectorWidget(QWidget):
         self.connect_signals()
 
     def setup_ui(self):
-        """Builds the UI for the custom widget."""
         # Create the widgets
         self.decrement_button = QPushButton("-")
         self.value_display = QLineEdit(str(self.current_value))
         self.increment_button = QPushButton("+")
 
-        # Set larger fixed sizes for buttons
+        # Button and value sizes
         self.decrement_button.setFixedSize(80, 80)
         self.increment_button.setFixedSize(80, 80)
-
-        # Set larger fixed size for value display
         self.value_display.setFixedSize(120, 80)
 
         # Style the buttons with Christmas theme
@@ -102,6 +99,7 @@ class RangeSelectorWidget(QWidget):
 
         # Add label if provided
         if self.label_text:
+            # TODO adjust the label style - more aligned with the selector
             label = QLabel(self.label_text)
             label_font = QFont()
             label_font.setPointSize(18)
@@ -112,7 +110,7 @@ class RangeSelectorWidget(QWidget):
             main_layout.addWidget(label)
 
         main_layout.addLayout(h_layout)
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setContentsMargins(10, 10, 10, 10)
         self.setLayout(main_layout)
 
     def connect_signals(self):

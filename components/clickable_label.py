@@ -13,7 +13,7 @@ class ClickableLabel(QLabel):
 
     def mousePressEvent(self, event):
         # Emit the custom 'clicked' signal when the mouse is pressed on the label
-        if event.button() == Qt.LeftButton and self.is_clickable:
+        if event.button() == Qt.MouseButton.LeftButton and self.is_clickable:
             self.clicked.emit(self.image_path)
         super().mousePressEvent(event)  # Call the base class method
 

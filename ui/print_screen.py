@@ -9,7 +9,10 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
+from PIL import Image
+from components.range_selector import RangeSelectorWidget
 from controllers.image_processor import ImageProcessor
 from controllers.session_manager import SessionManager
 from ui.base_screen import BaseScreen
@@ -45,13 +48,30 @@ class PrintScreen(BaseScreen):
         main_layout.addWidget(title_label)
 
         # Image preview label
+        self.preview_widget = QWidget()
+        self.preview_widget.setObjectName("previewWidget")
+        self.preview_widget.setStyleSheet(
+            "QWidget#previewWidget {border: 3px solid #2d5a2d; background-color: white;}"
+        )
+
+        self.preview_layout = QHBoxLayout(self.preview_widget)
+        self.preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         self.preview_label = QLabel()
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_label.setStyleSheet(
-            "border: 3px solid #2d5a2d; background-color: white;"
-        )
         self.preview_label.setMinimumSize(800, 400)
-        main_layout.addWidget(self.preview_label)
+        self.preview_layout.addWidget(self.preview_label)
+
+        self.add_number_of_prints_label = RangeSelectorWidget(
+            initial_value=2,
+            min_value=2,
+            max_value=10,
+            label_text="Number of half 4R prints",
+        )
+        self.add_number_of_prints_label.setMinimumSize(400, 100)
+        self.preview_layout.addWidget(self.add_number_of_prints_label)
+
+        main_layout.addWidget(self.preview_widget)
 
         # Buttons layout
         button_layout = QHBoxLayout()
@@ -78,9 +98,10 @@ class PrintScreen(BaseScreen):
         popup_layout = QVBoxLayout(self.popup_dialog)
         popup_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        popup_message = QLabel("Sent to print")
+        popup_message = QLabel(text="Sent to print")
         popup_message.setFont(QFont("Arial", 16))
         popup_message.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        popup_message.setStyleSheet("color: black;")
         popup_layout.addWidget(popup_message)  # Add the label to the layout
 
         # Optional: Add a close button
@@ -112,9 +133,16 @@ class PrintScreen(BaseScreen):
     def generate_composite(self, photos_path):
         """Create and display the photo composite."""
         # Get template info from session manager
-        template_path, template_index, num_photos = self._session_manager.template_info
+        template_path, template_index, num_photos, preview_path = (
+            self._session_manager.template_info
+        )
 
-        if template_path is None or template_index is None or num_photos is None:
+        if (
+            template_path is None
+            or template_index is None
+            or num_photos is None
+            or preview_path is None
+        ):
             raise ValueError("No template info available in session")
 
         # Create the composite
@@ -124,26 +152,26 @@ class PrintScreen(BaseScreen):
             template_index=template_index,
         )
 
-        # Display the composite in the preview
-        self._display_composite()
+        # Display the selected preview strip in the preview
+        self._display_preview_strip(preview_path)
 
         return self._composite_image
 
-    def _display_composite(self):
-        """Display the composite image in the preview label."""
-        if self._composite_image is None:
-            return
+    def _display_preview_strip(self, preview_path):
+        """Display the preview image in the preview label."""
+        if preview_path is None:
+            raise ValueError("No preview path available in session")
 
-        # Convert to QPixmap for display
-        pixmap = self._image_processor.frame_to_qpixmap(
-            self._composite_image,
-            target_size=(
-                self.preview_label.width() - 10,
-                self.preview_label.height() - 10,
-            ),
-            keep_aspect=True,
+        pixmap = QPixmap(preview_path)
+
+        pixmap_scaled = pixmap.scaled(
+            self.preview_label.size(),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
         )
-        self.preview_label.setPixmap(pixmap)
+
+        # Convert for QPixmap for display
+        self.preview_label.setPixmap(pixmap_scaled)
 
     def _on_print_clicked(self):
         """Handle print button click."""
@@ -151,14 +179,24 @@ class PrintScreen(BaseScreen):
             print("No composite image to print")
             return
 
-        # Save the composite to session folder
+        # Save the composite to session folder with DPI preserved
         session_folder = self._session_manager.get_current_session_folder
         if session_folder:
             output_path = os.path.join(session_folder, "final_composite.png")
-            cv.imwrite(output_path, self._composite_image)
-            print(f"Composite saved to: {output_path}")
 
-        # TODO: Add actual printing logic here
+            # Get DPI from image processor (preserves original or defaults to 300)
+            dpi = self._image_processor.get_composite_dpi()
+
+            # Convert BGR to RGB for PIL
+            composite_rgb = cv.cvtColor(self._composite_image, cv.COLOR_BGR2RGB)
+
+            # Save with PIL to preserve/set DPI
+            img = Image.fromarray(composite_rgb)
+            img.save(output_path, dpi=dpi)
+            print(f"Composite saved to: {output_path} (DPI: {dpi})")
+
         print("Sending to printer...")
         self.popup_dialog.show()
-        self.printer.print_images(output_path)
+        self.printer.print_images(
+            output_path, num_copies=self.add_number_of_prints_label.current_value
+        )

@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Tuple
 from PySide6.QtCore import QObject, Qt
 from PySide6.QtGui import QImage, QPixmap
 import cv2 as cv
 import numpy as np
+from PIL import Image
 from config.load_metadata import templates_config as meta_config
 
 
@@ -13,6 +14,7 @@ class ImageProcessor(QObject):
         super().__init__()
         self._overlay_cache = {}
         self._current_overlay_image = None
+        self._composite_dpi = None  # Store DPI for the composite
 
     def load_overlay(self, overlay_path: str):
         """Load an overlay image with caching."""
@@ -145,6 +147,32 @@ class ImageProcessor(QObject):
         """Clear the overlay cache to free memory."""
         self._overlay_cache.clear()
 
+    @staticmethod
+    def _get_image_dpi(image_path: str) -> Tuple[int, int]:
+        """
+        Get DPI from an image file.
+
+        Args:
+            image_path: Path to the image file
+
+        Returns:
+            Tuple of (dpi_x, dpi_y). Defaults to (300, 300) if not found.
+        """
+        try:
+            with Image.open(image_path) as img:
+                dpi = img.info.get("dpi")
+                if dpi:
+                    return tuple(int(d) for d in dpi)
+        except Exception as e:
+            print(f"Could not read DPI from {image_path}: {e}")
+
+        # Default to 300 DPI for printing
+        return (300, 300)
+
+    def get_composite_dpi(self) -> Tuple[int, int]:
+        """Get the DPI of the last created composite."""
+        return self._composite_dpi if self._composite_dpi else (300, 300)
+
     def create_photo_composite(
         self, photo_paths: List[str], template_path: str, template_index: int
     ) -> np.ndarray:
@@ -159,6 +187,11 @@ class ImageProcessor(QObject):
         Returns:
             Composite image as numpy array (BGR format)
         """
+        # Get DPI from the first photo (all should have same DPI from camera)
+        if photo_paths:
+            self._composite_dpi = self._get_image_dpi(photo_paths[0])
+            print(f"Using DPI from photos: {self._composite_dpi}")
+
         # Load template
         template = cv.imread(template_path)
         if template is None:
@@ -168,7 +201,6 @@ class ImageProcessor(QObject):
         template_height, template_width = template.shape[:2]
 
         # Define photo slot positions for each template (x, y, width, height)
-        # These are approximate positions based on the visual inspection of templates
         template_configs = meta_config
 
         if template_index not in template_configs:
