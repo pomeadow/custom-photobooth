@@ -147,7 +147,7 @@ class CameraScreen(BaseScreen):
             self.navigate_to.emit("selection")
         else:
             # Only restart 5 seconds countdown if we still have photos to take
-            self.countdown.start(1)
+            self.countdown.start(5)
 
     def _update_counter(self):
         """Update photo counter display."""
