@@ -49,17 +49,6 @@ class CameraController(QObject):
         actual_height = self._camera.get(cv.CAP_PROP_FRAME_HEIGHT)
         actual_fps = self._camera.get(cv.CAP_PROP_FPS)
 
-        if actual_width != camera_width or actual_height != camera_height:
-            print(f"⚠️  Camera doesn't support {camera_width}×{camera_height}")
-            print(
-                f"    Actual resolution: {int(actual_width)}×{int(actual_height)} @ {actual_fps:.1f}fps"
-            )
-            print(f"    This is a camera/driver limitation, not a software issue")
-        else:
-            print(
-                f"✓ Preview resolution: {int(actual_width)}×{int(actual_height)} @ {actual_fps:.1f}fps"
-            )
-
         # Reset frame counter for new camera session
         self._frame_count = 0
         self._ready_emitted = False

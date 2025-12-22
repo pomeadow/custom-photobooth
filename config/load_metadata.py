@@ -44,19 +44,18 @@ templates_config = {
 }
 
 templates_path = get_png_file_paths("./resources/templates/v0.1/")
-print(templates_path)
+# print(templates_path)
 
 templates_config_dict = dict()
 
 
 def initialize_templates_config_dict():
     templates_path.sort()
-    print(templates_path)
     for template in templates_path:
         pixel_10_rgb = Image.open(template).getpixel((10, 10))
         if pixel_10_rgb is None or type(pixel_10_rgb) != tuple or len(pixel_10_rgb) < 3:
             raise Exception(f"Could not get pixel at (10,10) for {template}")
-        print(f"Pixel at (10,10): {pixel_10_rgb}")
+        # print(f"Pixel at (10,10): {pixel_10_rgb}")
         if "horizontal" in template.lower():
             templates_config_dict[template] = {
                 "num_photos": 4,
@@ -71,4 +70,4 @@ def initialize_templates_config_dict():
                 "color": pixel_10_rgb,
                 "slots": templates_config[8]["slots"],
             }
-    print(f"Initialized templates_config_dict: {templates_config_dict.keys()}")
+    # print(f"Initialized templates_config_dict: {templates_config_dict.keys()}")

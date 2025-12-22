@@ -33,7 +33,7 @@ class CountdownTimer(QWidget):
         else:
             # 1 sec -> 0 sec
             self.seconds_to_countdown -= 1
-            self.tick.emit(self.seconds_to_countdown)
+            # self.tick.emit(self.seconds_to_countdown)
             self._timer.stop()
             self._is_running = False
             self.finished.emit()

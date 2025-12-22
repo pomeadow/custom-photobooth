@@ -65,6 +65,7 @@ class SelectionScreen(BaseScreen):
     def reset(self):
         self.selected_photos = []
         self.selected_labels = {}
+        self.selected_template_path = None
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -84,6 +85,7 @@ class SelectionScreen(BaseScreen):
         self.selected_labels = {}  # Track labels by path for styling
         self.all_image_paths = []  # Will be populated when showing selection screen
         self.preview_strip_paths = {}  # Store preview strip paths {2: path, 3: path}
+        self.selected_template_path = None  # Track currently selected template
 
         # Navigation buttons
         top_nav_layout = QHBoxLayout()
@@ -174,7 +176,7 @@ class SelectionScreen(BaseScreen):
         bottom_right_layout.addWidget(start_over_button)
         bottom_right_layout.addWidget(self.print_button)
 
-        main_layout.addLayout(top_nav_layout)
+        main_layout.addWidget(top_widget)
         main_layout.addLayout(middle_layout)
         main_layout.addWidget(bottom_widget)
 

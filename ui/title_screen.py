@@ -51,4 +51,3 @@ class TitleScreen(BaseScreen):
     
     def _emit_signals(self):
         self.create_session_signal.emit()
-        self.navigate_to.emit("camera")

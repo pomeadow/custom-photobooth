@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QEventLoop, QTimer, Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -36,8 +36,11 @@ class CameraScreen(BaseScreen):
         self.photos_taken = 0
         self.countdown = CountdownTimer()
         self._overlay_path = None
-        self.sound_effect = load_sound_effect("./resources/sounds/countdown_beep.wav")
+        self.is_flashing = False  # Flag to pause camera updates during flash
+        self.sound_effect = load_sound_effect("./resources/sounds/short-beep-countdown.wav")
+        self.camera_effect = load_sound_effect("./resources/sounds/camera-flash_join.wav")
         self.sound_effect.setLoopCount(1) # Play only once per trigger
+        self.camera_effect.setLoopCount(1)
         self._setup_ui()
         self._connect_signals()
 
@@ -114,8 +117,16 @@ class CameraScreen(BaseScreen):
         self.countdown.tick.connect(self._on_countdown_tick)
         self.countdown.finished.connect(self._on_countdown_finished)
 
+        # Flash signals
+        self.flash.flash_started.connect(self._on_flash_started)
+        self.flash.flash_finished.connect(self._on_flash_finished)
+
     def _on_camera_frame(self, frame):
         """Update preview with camera frame."""
+        # Skip updates during flash to prevent interference
+        if self.is_flashing:
+            return
+
         # Apply overlay and convert to pixmap
         processed = self.image_processor.apply_overlay(
             frame, None, flip_horizontal=False
@@ -137,10 +148,21 @@ class CameraScreen(BaseScreen):
 
         self.session_manager.save_photo(processed)
 
+        # TODO fix the sound and flash when capture is pressed
         # Add flash effect
         self.flash.flash()
+        try:
+            self.sound_effect.stop()
+        except:
+            pass
+        self.camera_effect.play()
         self.photos_taken += 1
         self._update_counter()
+
+        # Delay for effects to show
+        loop = QEventLoop()
+        QTimer.singleShot(100, loop.quit)
+        loop.exec()
 
         if self.photos_taken >= self.photos_to_take:
             self.session_continued.emit()
@@ -173,3 +195,11 @@ class CameraScreen(BaseScreen):
         self.countdown.stop()
         # Auto-capture photo when timer reaches 0
         self._capture_photo()
+
+    def _on_flash_started(self):
+        """Called when flash effect starts - pause camera updates."""
+        self.is_flashing = True
+
+    def _on_flash_finished(self):
+        """Called when flash effect finishes - resume camera updates."""
+        self.is_flashing = False

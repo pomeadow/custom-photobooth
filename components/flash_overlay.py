@@ -1,31 +1,32 @@
-from PySide6.QtCore import QEventLoop, QObject, QTimer, Qt
+from PySide6.QtCore import QObject, QTimer, Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
 
 class FlashOverlay(QObject):
+    flash_started = Signal()
+    flash_finished = Signal()
+
     def __init__(self, camera_label: QLabel) -> None:
         super().__init__()
-        # Store original image
         self.camera_label = camera_label
-        self.original_pixmap = camera_label.pixmap()
-        self.white_pixmap = QPixmap(camera_label.size())
-        self.camera_label.setPixmap(self.white_pixmap)
 
-    def flash(
-        self,
-    ):
-        # Flash white
-        self.camera_label.setPixmap(self.white_pixmap)
-        self.white_pixmap.fill(Qt.GlobalColor.white)
+    def flash(self):
+        # Signal that flash is starting (to pause camera updates)
+        self.flash_started.emit()
 
-        # Use QTimer to restore after 200ms
-        QTimer.singleShot(
-            400,
-            lambda: self.camera_label.setPixmap(self.original_pixmap)
-            if self.original_pixmap
-            else None,
-        )
-        loop = QEventLoop()
-        QTimer.singleShot(400, loop.quit)
-        loop.exec()
+        # Capture current pixmap before flashing
+        original_pixmap = self.camera_label.pixmap()
+
+        # Create white pixmap and flash
+        white_pixmap = QPixmap(self.camera_label.size())
+        white_pixmap.fill(Qt.GlobalColor.white)
+        self.camera_label.setPixmap(white_pixmap)
+
+        # Restore original pixmap and signal completion after 400ms
+        def restore():
+            if original_pixmap:
+                self.camera_label.setPixmap(original_pixmap)
+            self.flash_finished.emit()
+
+        QTimer.singleShot(300, restore)
