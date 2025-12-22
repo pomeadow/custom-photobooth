@@ -49,7 +49,7 @@ class PrintScreen(BaseScreen):
         self.preview_widget = QWidget()
         self.preview_widget.setObjectName("previewWidget")
         self.preview_widget.setStyleSheet(
-            "QWidget#previewWidget {border: 3px solid #2d5a2d; background-color: white;}"
+            "QWidget#previewWidget {border: 3px solid #C9A961; background-color: white;}"
         )
 
         self.preview_layout = QHBoxLayout(self.preview_widget)

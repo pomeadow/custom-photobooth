@@ -1,7 +1,7 @@
 buttons_css = """
             QPushButton {
                 background-color: #81151b;
-                color: white;
+                color: #C9A961;
                 border: none;
                 padding: 20px 40px;
                 border-radius: 10px;
@@ -32,18 +32,18 @@ widget_50_css = """
         background-color: rgba(255, 255, 255, 0.5);
 }"""
 
-dynapuff_light_orange = """
+widget_text_colour = """
     QLabel {
-        color: #fff5e0
+        color: #C9A961;
     }
 """
 
 counter_css = """
             font-size: 64px; 
             font-weight: bold;
-            color: #C9A961;  /* Hot pink */
+            color: #C9A961;
             font-family: 'Impact', 'Arial Black', sans-serif;
-            background-color: rgba(129, 21, 27, 100);
+            background-color: #81151B;
             padding: 15px;
             border-radius: 20px;
             border: 5px solid #C9A961;
@@ -54,7 +54,7 @@ timer_css = """
             font-weight: bold;
             color: #C9A961;
             font-family: 'Impact', 'Arial Black', sans-serif;
-            background-color: rgba(129, 21, 27, 100);
+            background-color: #81151B;
             border-radius: 50%;
             padding: 30px;
         """

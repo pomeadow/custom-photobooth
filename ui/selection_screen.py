@@ -1,6 +1,7 @@
 import os
+from turtle import st
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
@@ -93,10 +94,9 @@ class SelectionScreen(BaseScreen):
         self.preview_widget.setStyleSheet(widget_50_css)
         self.preview_label = QLabel("Preview")
         self.preview_label.setStyleSheet(
-            "font-size: 24px; font-weight: bold; color: #2d5a2d;" + widget_0_css
+            "font-size: 24px; font-weight: bold; color: #C9A961;"
         )
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        self.preview_label.setVisible(False)
 
         self.preview_strip_label = QLabel()
         self.preview_strip_label.setFixedSize(480, 640)
@@ -107,11 +107,9 @@ class SelectionScreen(BaseScreen):
         self.preview_layout.addWidget(self.preview_strip_label)
         self.preview_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        # TODO adjust the grid so that it is centered before preview shows at the side
         # Grid for images
         self.grid_widget = QWidget()
         self.grid_layout = QGridLayout(self.grid_widget)
-        self.grid_widget.setStyleSheet(widget_50_css)
 
         middle_layout.addWidget(self.preview_widget)
         middle_layout.addWidget(self.grid_widget)
@@ -140,12 +138,22 @@ class SelectionScreen(BaseScreen):
         bottom_left_layout.addWidget(label_instructions)
         bottom_nav_layout.addLayout(bottom_left_layout, 2)
 
+        bottom_right_layout = QVBoxLayout()
+        bottom_right_widget = QWidget()
+        bottom_right_widget.setLayout(bottom_right_layout)
+        bottom_right_layout.setContentsMargins(10, 0, 0, 0)
+        bottom_nav_layout.addWidget(bottom_right_widget, 1)
+
+        start_over_button = QPushButton("Start Over")
+        start_over_button.setStyleSheet(buttons_css)
+        start_over_button.clicked.connect(lambda: self.navigate_to.emit("title"))
+
         self.print_button = QPushButton("Next")
         self.print_button.clicked.connect(lambda: self.navigate_to.emit("print"))
         self.print_button.setStyleSheet(buttons_css)
         self.print_button.setEnabled(False)
-
-        bottom_nav_layout.addWidget(self.print_button, 1)
+        bottom_right_layout.addWidget(start_over_button)
+        bottom_right_layout.addWidget(self.print_button)
 
         main_layout.addLayout(top_nav_layout)
         main_layout.addLayout(middle_layout)
@@ -204,19 +212,13 @@ class SelectionScreen(BaseScreen):
 
             # Apply selection styling if already selected
             if path in self.selected_photos:
-                label.setStyleSheet(widget_0_css + "border: 5px solid #2d5a2d;")
+                label.setStyleSheet(widget_0_css + "border: 5px solid #C9A961;")
                 label.is_selected = True
             else:
-                label.setStyleSheet(widget_0_css + "border: 2px solid #ccc;")
+                label.setStyleSheet(widget_0_css + "border: none;")
 
             self.selected_labels[path] = label
             self.grid_layout.addWidget(label, row, col)
-
-        # Update navigation
-        total_pages = (
-            len(self.all_image_paths) + self.images_per_page - 1
-        ) // self.images_per_page
-        self.page_label.setText(f"Page {self.current_page + 1} of {total_pages}")
 
     def _on_label_clicked(self, image_path):
         """Handle image selection/deselection"""
@@ -224,16 +226,14 @@ class SelectionScreen(BaseScreen):
             # Deselect
             self.selected_photos.remove(image_path)
             if image_path in self.selected_labels:
-                self.selected_labels[image_path].setStyleSheet(
-                    "border: 2px solid #ccc;" + widget_0_css
-                )
+                self.selected_labels[image_path].setStyleSheet(widget_0_css + "border: none;")
                 self.selected_labels[image_path].is_selected = False
         else:
             # Select
             self.selected_photos.append(image_path)
             if image_path in self.selected_labels:
                 self.selected_labels[image_path].setStyleSheet(
-                    "border: 5px solid #2d5a2d;" + widget_0_css
+                    "border: 5px solid #C9A961;" + widget_0_css
                 )
                 self.selected_labels[image_path].is_selected = True
 
@@ -244,23 +244,6 @@ class SelectionScreen(BaseScreen):
         self.template_selection_widget.setVisible(True)
         # Update preview strip when 2 or 4 photos are selected
         self._update_preview_strip()
-
-    def _update_label_clickability(self):
-        """Enable/disable labels based on selection count."""
-        num_selected = len(self.selected_photos)
-
-        for path, label in self.selected_labels.items():
-            if path in self.selected_photos:
-                # Always allow deselecting selected photos
-                label.set_clickable(True)
-            elif num_selected >= 3:
-                # Disable unselected labels when 3 are already selected
-                label.set_clickable(False)
-                label.setStyleSheet("border: 2px solid #ccc; opacity: 0.5;" + widget_0_css)
-            else:
-                # Enable unselected labels when less than 3 are selected
-                label.set_clickable(True)
-                label.setStyleSheet("border: 2px solid #ccc;" + widget_0_css)
 
     def _update_preview_strip(self):
         """Generate and display preview strip based on number of selected photos and template."""
@@ -390,7 +373,7 @@ class SelectionScreen(BaseScreen):
                                                                         {rgb[1]}, 
                                                                         {rgb[2]});
                                                 border-radius: {40 // 2}px;
-                                                border: 5px solid #2d5a2d;""")
+                                                border: 5px solid #C9A961;""")
             selected_widget.is_selected = True
             # Update preview strip when new template selected
             self._update_preview_strip()
@@ -398,7 +381,6 @@ class SelectionScreen(BaseScreen):
     def _hide_preview_strip(self):
         """Hide the preview strip."""
         self.preview_strip_label.setVisible(False)
-        self.preview_label.setVisible(False)
 
     def _cleanup_old_previews(self):
         try:

@@ -14,7 +14,7 @@ from controllers.camera_controller import CameraController
 from controllers.image_processor import ImageProcessor
 from controllers.session_manager import SessionManager
 from ui.base_screen import BaseScreen
-from ui.styles import buttons_css, counter_css, timer_css, widget_0_css
+from ui.styles import buttons_css, counter_css, timer_css
 from utils.utils import load_sound_effect
 
 
@@ -101,7 +101,6 @@ class CameraScreen(BaseScreen):
         self.camera_label.setMinimumSize(640, 480)
         self.camera_label.setText("Camera preview will appear here")
         self.camera_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.camera_label.setStyleSheet(widget_0_css)
 
         self.flash = FlashOverlay(self.camera_label)
 
@@ -173,7 +172,7 @@ class CameraScreen(BaseScreen):
             self.sound_effect.play()
 
     def _on_countdown_finished(self):
-        self.timer_label.setText("0")
+        self.timer_label.setText("Time's up!")
         self.countdown.stop()
         # Auto-capture photo when timer reaches 0
         self._capture_photo()

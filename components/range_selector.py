@@ -45,7 +45,7 @@ class RangeSelectorWidget(QWidget):
         # Style the buttons with Christmas theme
         button_style = """
             QPushButton {
-                background-color: #d42c2c;
+                background-color: #81151B;
                 color: white;
                 border: none;
                 border-radius: 10px;
@@ -71,16 +71,16 @@ class RangeSelectorWidget(QWidget):
             QLineEdit {
                 font-size: 36px;
                 font-weight: bold;
-                color: #2d5a2d;
-                border: 2px solid #d42c2c;
+                color: #C9A961;
+                border: 2px solid #81151B;
                 border-radius: 10px;
                 background-color: white;
             }
             QLineEdit:disabled {
                 font-size: 36px;
                 font-weight: bold;
-                color: #2d5a2d;
-                border: 2px solid #d42c2c;
+                color: #C9A961;
+                border: 2px solid #81151B;
                 border-radius: 10px;
                 background-color: #f5f5f5;
             }
@@ -106,7 +106,7 @@ class RangeSelectorWidget(QWidget):
             label_font.setBold(True)
             label.setFont(label_font)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            label.setStyleSheet("color: #2d5a2d; margin: 10px;")
+            label.setStyleSheet("color: #C9A961; margin: 10px;")
             main_layout.addWidget(label)
 
         main_layout.addLayout(h_layout)
