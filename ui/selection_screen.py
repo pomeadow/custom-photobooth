@@ -40,6 +40,7 @@ class SelectionScreen(BaseScreen):
         self._setup_ui()
 
     def on_enter(self):
+        print(f"Widget size on enter: {self.size()}")
         self.current_session_folder = self.session_manager.get_current_session_folder
         # Load images from current session folder
         if self.current_session_folder and os.path.exists(self.current_session_folder):
@@ -67,6 +68,15 @@ class SelectionScreen(BaseScreen):
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
+
+        # Debug: Print widget size (might not be final yet)
+        print(f"Widget size at setup: {self.size()}")
+
+        # Get actual screen size
+        from PySide6.QtGui import QGuiApplication
+        screen = QGuiApplication.primaryScreen()
+        screen_geometry = screen.geometry()
+        print(f"Screen size: {screen_geometry.width()}x{screen_geometry.height()}")
 
         self.current_page = 0
         self.images_per_page = 4
@@ -122,6 +132,9 @@ class SelectionScreen(BaseScreen):
         self.template_selection_widget.setStyleSheet(widget_50_css)
 
         bottom_nav_layout = QHBoxLayout()
+        bottom_widget = QWidget()
+        bottom_widget.setLayout(bottom_nav_layout)
+        bottom_widget.setMaximumHeight(150)
         bottom_left_layout = QVBoxLayout()
         bottom_left_layout.addWidget(self.template_selection_widget)
 
@@ -141,23 +154,29 @@ class SelectionScreen(BaseScreen):
         bottom_right_layout = QVBoxLayout()
         bottom_right_widget = QWidget()
         bottom_right_widget.setLayout(bottom_right_layout)
-        bottom_right_layout.setContentsMargins(10, 0, 0, 0)
+        bottom_nav_layout.addStretch()
         bottom_nav_layout.addWidget(bottom_right_widget, 1)
 
         start_over_button = QPushButton("Start Over")
-        start_over_button.setStyleSheet(buttons_css)
+        start_over_button.setStyleSheet(buttons_css + """QPushButton {
+                padding: 10px 20px;
+                margin: 5px;
+            }""")
         start_over_button.clicked.connect(lambda: self.navigate_to.emit("title"))
 
         self.print_button = QPushButton("Next")
         self.print_button.clicked.connect(lambda: self.navigate_to.emit("print"))
-        self.print_button.setStyleSheet(buttons_css)
+        self.print_button.setStyleSheet(buttons_css + """QPushButton {
+                padding: 10px 20px;
+                margin: 5px;
+            }""")
         self.print_button.setEnabled(False)
         bottom_right_layout.addWidget(start_over_button)
         bottom_right_layout.addWidget(self.print_button)
 
         main_layout.addLayout(top_nav_layout)
         main_layout.addLayout(middle_layout)
-        main_layout.addLayout(bottom_nav_layout)
+        main_layout.addWidget(bottom_widget)
 
         # Load first page
         self.update_image_grid()

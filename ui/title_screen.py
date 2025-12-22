@@ -31,7 +31,7 @@ class TitleScreen(BaseScreen):
         title_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
         title_layout.setContentsMargins(100, 0, 100, 80)  # Add bottom margin
 
-        start_photobooth_button = DecorativeButton("START")
+        start_photobooth_button = DecorativeButton("START", min_width=800, min_height=120)
         start_photobooth_button.clicked.connect(self._emit_signals)
 
         title_layout.addWidget(start_photobooth_button, 0, Qt.AlignmentFlag.AlignCenter)

@@ -38,18 +38,20 @@ class PrintScreen(BaseScreen):
         # Title
         title_label = QLabel("Your Photo is Ready!")
         title_font = QFont()
-        title_font.setPointSize(32)
+        title_font.setPointSize(20)
         title_font.setBold(True)
         title_label.setFont(title_font)
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("color: #d42c2c; margin: 20px;")
+        title_label.setStyleSheet("color: #C9A961; margin: 20px;")
         main_layout.addWidget(title_label)
 
         # Image preview label
         self.preview_widget = QWidget()
         self.preview_widget.setObjectName("previewWidget")
+
+        self.preview_widget.setMinimumSize(900, 700)
         self.preview_widget.setStyleSheet(
-            "QWidget#previewWidget {border: 3px solid #C9A961; background-color: white;}"
+            "QWidget#previewWidget {border-top: 3px solid #C9A961; background-color: white;}"
         )
 
         self.preview_layout = QHBoxLayout(self.preview_widget)
@@ -57,8 +59,8 @@ class PrintScreen(BaseScreen):
 
         self.preview_label = QLabel()
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_label.setMinimumSize(800, 400)
-        self.preview_layout.addWidget(self.preview_label)
+        self.preview_label.setMinimumSize(800, 640)
+        self.preview_layout.addWidget(self.preview_label, 2)
 
         self.add_number_of_prints_label = RangeSelectorWidget(
             initial_value=2,
@@ -66,8 +68,8 @@ class PrintScreen(BaseScreen):
             max_value=10,
             label_text="Number of half 4R prints",
         )
-        self.add_number_of_prints_label.setMinimumSize(400, 100)
-        self.preview_layout.addWidget(self.add_number_of_prints_label)
+        self.add_number_of_prints_label.setMaximumHeight(300)
+        self.preview_layout.addWidget(self.add_number_of_prints_label, 1)
 
         main_layout.addWidget(self.preview_widget)
 

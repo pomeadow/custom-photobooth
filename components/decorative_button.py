@@ -1,15 +1,18 @@
+from calendar import c
 import re
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QRect, QRectF, Qt, Signal
 from PySide6.QtGui import QPainter, QPainterPath, QPen, QBrush, QColor, QFont
 from PySide6.QtWidgets import QPushButton
+from numpy import rec
 
 
 class DecorativeButton(QPushButton):
     """Custom button with decorative corner quadrants."""
 
-    def __init__(self, text="", parent=None):
+    def __init__(self, text="", parent=None, min_width=None, min_height=None):
         super().__init__(text, parent)
-        self.setMinimumSize(800, 120)
+        if min_width and min_height:
+            self.setMinimumSize(min_width, min_height)
         self.border_color = QColor("#C9A961")  # Gold
         self.text_color = QColor("#C9A961")  # Gold
         self.bg_color = QColor(129, 21, 27, 76)  # Semi-transparent red
@@ -43,106 +46,90 @@ class DecorativeButton(QPushButton):
 
         rect = self.rect()
         
-       
-        pen = QPen(QColor("#C9A961"),  4)
-        # painter.setPen(pen)
-
         # Draw background (solid, not transparent)
         bg_color = QColor(129, 21, 27) if not self.is_hovered else QColor(160, 30, 30)
         if self.is_pressed_state:
             bg_color = QColor(100, 15, 20)
 
-        # pen = QPen(bg_color, 4)
+        pen = QPen(bg_color, 1)
         painter.setPen(pen)
-       
-        # painter.fillRect(rect, bg_color)
 
         # Draw concave circular quadrants at corners (curving inward toward center)
         quadrant_radius = 10
-        corner_inset = 18
+        corner_inset = quadrant_radius
 
         path = QPainterPath()
-
-        path.moveTo(rect.left() + quadrant_radius, rect.top())
-        path.lineTo(rect.right() - quadrant_radius, rect.top())
+        path.moveTo(rect.left() + corner_inset + quadrant_radius, rect.top() + corner_inset)
+        path.lineTo(rect.right() - quadrant_radius - corner_inset, rect.top() + corner_inset)
         path.arcTo(
-            rect.right() - quadrant_radius,
+            rect.right() - (quadrant_radius + corner_inset),
             rect.top(),
             quadrant_radius * 2,
             quadrant_radius * 2,
             180, 90
         )
-        path.lineTo(rect.right(), rect.bottom() - quadrant_radius)
+        path.lineTo(rect.right() - corner_inset, rect.bottom() - quadrant_radius - corner_inset)
         path.arcTo(
-            rect.right(),
-            rect.bottom(),
-            quadrant_radius * 2,
-            quadrant_radius * 2,
-            270, 180)
-        path.lineTo(rect.left() + quadrant_radius, rect.bottom())
-        path.arcTo(
-            rect.left(),
-            rect.bottom() - quadrant_radius,
+            rect.right() - (quadrant_radius + corner_inset),
+            rect.bottom() -  (quadrant_radius + corner_inset),
             quadrant_radius * 2,
             quadrant_radius * 2,
             90, 90)
-        path.lineTo(rect.left(), rect.top() + quadrant_radius)
+        path.lineTo(rect.left() + quadrant_radius + corner_inset, rect.bottom() - corner_inset)
+        path.arcTo(
+            rect.left(),
+            rect.bottom() - (quadrant_radius + corner_inset),
+            quadrant_radius * 2,
+            quadrant_radius * 2,
+            0, 90)
+        path.lineTo(rect.left() + corner_inset, rect.top() + quadrant_radius + corner_inset)
         path.arcTo(
             rect.left(),
             rect.top(),
             quadrant_radius * 2,
             quadrant_radius * 2,
-            180,90)
+            270, 90)
         painter.drawPath(path)
+        painter.fillPath(path, bg_color)
 
-        # painter.drawLine(rect.left() + quadrant_radius, rect.top(), rect.right() - quadrant_radius, rect.top())
-        # painter.drawLine(rect.left() + quadrant_radius, rect.bottom(), rect.right() - quadrant_radius, rect.bottom())
-        # painter.drawLine(rect.left(), rect.top() + quadrant_radius, rect.left(), rect.bottom() + quadrant_radius)
-        # painter.drawLine(rect.right(), rect.top() - quadrant_radius, rect.right(), rect.bottom() - quadrant_radius)
-        # painter.fillPath(path, bg_color)
+        painter.setPen(QPen(QColor("#C9A961"), 3))
+        inner = QPainterPath()
+        margin = 5
+        inner.moveTo(rect.left() + corner_inset + quadrant_radius + margin, rect.top() + corner_inset + margin)
+        inner.lineTo(rect.right() - quadrant_radius - corner_inset - margin, rect.top() + corner_inset + margin)
+        inner.arcTo(
+            rect.right() - (quadrant_radius + corner_inset) - margin,
+            rect.top() + margin,
+            quadrant_radius * 2,
+            quadrant_radius * 2,
+            180, 90
+        )
+        inner.lineTo(rect.right() - corner_inset - margin, rect.bottom() - quadrant_radius - corner_inset - margin)
+        inner.arcTo(
+            rect.right() - (quadrant_radius + corner_inset) - margin,
+            rect.bottom() -  (quadrant_radius + corner_inset) - margin,
+            quadrant_radius * 2,
+            quadrant_radius * 2,
+            90, 90)
+        inner.lineTo(rect.left() + quadrant_radius + corner_inset + margin, rect.bottom() - corner_inset - margin)
+        inner.arcTo(
+            rect.left() + margin,
+            rect.bottom() - (quadrant_radius + corner_inset) - margin,
+            quadrant_radius * 2,
+            quadrant_radius * 2,
+            0, 90)
+        inner.lineTo(rect.left() + corner_inset + margin, rect.top() + quadrant_radius + corner_inset + margin)
+        inner.arcTo(
+            rect.left() + margin,
+            rect.top() + margin,
+            quadrant_radius * 2,
+            quadrant_radius * 2,
+            270, 90)
 
-        # # Top-left corner - arc curving inward (shows right and bottom edges)
-        # painter.drawArc(
-        #     rect.left() + corner_inset - quadrant_radius,
-        #     rect.top() + corner_inset - quadrant_radius,
-        #     quadrant_radius * 2,
-        #     quadrant_radius * 2,
-        #     180 * 16,
-        #     90 * 16       # Span angle (90 degrees)
-        # )
-
-        # # Top-right corner - arc curving inward (shows bottom and left edges)
-        # painter.drawArc(
-        #     rect.right() - corner_inset - quadrant_radius,
-        #     rect.top() + corner_inset - quadrant_radius,
-        #     quadrant_radius * 2,
-        #     quadrant_radius * 2,
-        #     270 * 16,  # Start angle (270 degrees)
-        #     90 * 16    # Span angle (90 degrees)
-        # )
-
-        # # Bottom-left corner - arc curving inward (shows top and right edges)
-        # painter.drawArc(
-        #     rect.left() + corner_inset - quadrant_radius,
-        #     rect.bottom() - corner_inset - quadrant_radius,
-        #     quadrant_radius * 2,
-        #     quadrant_radius * 2,
-        #     90 * 16,   # Start angle (90 degrees)
-        #     90 * 16    # Span angle (90 degrees)
-        # )
-
-        # # Bottom-right corner - arc curving inward (shows top and left edges)
-        # painter.drawArc(
-        #     rect.right() - corner_inset - quadrant_radius,
-        #     rect.bottom() - corner_inset - quadrant_radius,
-        #     quadrant_radius * 2,
-        #     quadrant_radius * 2,
-        #     0 * 16,    # Start angle (0 degrees)
-        #     90 * 16    # Span angle (90 degrees)
-        # )
-
+        # Draw inner shape
+        painter.drawPath(inner)
         # Draw text
         painter.setPen(self.text_color)
-        font = QFont("Impact", 72, QFont.Weight.Bold)
+        font = QFont("Impact", 60, QFont.Weight.Bold)
         painter.setFont(font)
         painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.text())
