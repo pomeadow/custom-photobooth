@@ -55,7 +55,7 @@ def generate_all_composites(photo_paths, output_dir=None, output_prefix="composi
         # Get the template file path
         template_files = {
             0: "./resources/templates/v0.1/templateup4.png",  # 2x3, 6 photos
-            1: "./resources/templates/templateup1.png",  # 2x4, 4 photos
+            1: "./resources/templates/templateup1.png",  # 4x2, 4 photos
             2: "./resources/templates/templateup2.png",  # 1x3, 3 photos
             3: "./resources/templates/v0.1/templateup3.png",  # 2x2, 4 photos
         }
@@ -77,9 +77,7 @@ def generate_all_composites(photo_paths, output_dir=None, output_prefix="composi
         # Use the required number of photos (cycle if we have more)
         photos_to_use = photo_paths[:num_photos_needed]
 
-        print(
-            f"Template {template_index} ({template_info['num_photos']} photos, rotate={template_info['toRotate']})..."
-        )
+        print(f"Template {template_index} ({template_info['num_photos']} photos)...")
 
         try:
             composite = processor.create_photo_composite(

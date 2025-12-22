@@ -17,4 +17,6 @@ v0.1 flow
 4) then ask user to choose the photos they want (min 2, max 3)
 5) give a preview of the strip of 3 photo or strip of 2, choose number of prints (even)
 
+![alt text](preview.jpg)
+
 # custom-photobooth

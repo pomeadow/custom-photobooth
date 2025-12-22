@@ -5,8 +5,6 @@ from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
     QLabel,
-    QLayout,
-    QMessageBox,
     QPushButton,
     QVBoxLayout,
     QWidget,
@@ -133,23 +131,15 @@ class PrintScreen(BaseScreen):
     def generate_composite(self, photos_path):
         """Create and display the photo composite."""
         # Get template info from session manager
-        template_path, template_index, num_photos, preview_path = (
-            self._session_manager.template_info
-        )
+        template_path, num_photos, preview_path = self._session_manager.template_info
 
-        if (
-            template_path is None
-            or template_index is None
-            or num_photos is None
-            or preview_path is None
-        ):
+        if template_path is None or num_photos is None or preview_path is None:
             raise ValueError("No template info available in session")
 
         # Create the composite
         self._composite_image = self._image_processor.create_photo_composite(
             photo_paths=photos_path,
             template_path=template_path,
-            template_index=template_index,
         )
 
         # Display the selected preview strip in the preview

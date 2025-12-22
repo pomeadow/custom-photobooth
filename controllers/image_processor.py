@@ -1,10 +1,11 @@
+from re import I
 from typing import List, Tuple
 from PySide6.QtCore import QObject, Qt
 from PySide6.QtGui import QImage, QPixmap
 import cv2 as cv
 import numpy as np
 from PIL import Image
-from config.load_metadata import templates_config as meta_config
+from config.load_metadata import templates_config_dict
 
 
 class ImageProcessor(QObject):
@@ -174,7 +175,7 @@ class ImageProcessor(QObject):
         return self._composite_dpi if self._composite_dpi else (300, 300)
 
     def create_photo_composite(
-        self, photo_paths: List[str], template_path: str, template_index: int
+        self, photo_paths: List[str], template_path: str
     ) -> np.ndarray:
         """
         Create a composite image by placing photos into a template layout.
@@ -182,7 +183,6 @@ class ImageProcessor(QObject):
         Args:
             photo_paths: List of paths to photos to insert
             template_path: Path to the template image
-            template_index: Index of the template (0-3)
 
         Returns:
             Composite image as numpy array (BGR format)
@@ -200,19 +200,11 @@ class ImageProcessor(QObject):
         # Get template dimensions
         template_height, template_width = template.shape[:2]
 
-        # Define photo slot positions for each template (x, y, width, height)
-        template_configs = meta_config
-
-        if template_index not in template_configs:
-            raise ValueError(f"Invalid template index: {template_index}")
-
-        config = template_configs[template_index]
-        slots = config["slots"]
-        to_rotate = config["toRotate"]
-        num_photos_needed = min(len(photo_paths), len(slots))
-
         # Create a copy of the template to work with
         result = template.copy()
+
+        # Photo slot positions for each template (x, y, width, height)
+        slots = templates_config_dict[template_path]["slots"]
 
         # Insert each photo into its slot
         for i in range(len(slots)):
@@ -225,9 +217,6 @@ class ImageProcessor(QObject):
             if photo is None:
                 print(f"Warning: Could not load photo {photo_path}")
                 continue
-
-            if to_rotate:
-                photo = cv.rotate(photo, cv.ROTATE_90_COUNTERCLOCKWISE)
 
             # Resize and crop photo to exactly fill the slot
             photo_resized = self._resize_photo_to_slot(photo, slot_w, slot_h)

@@ -8,15 +8,6 @@ import io
 
 load_dotenv()
 
-# Try to import gphoto2, but don't fail if not available
-try:
-    import gphoto2 as gp
-
-    GPHOTO2_AVAILABLE = True
-except ImportError:
-    GPHOTO2_AVAILABLE = False
-    print("Warning: gphoto2 not available. Install with: pip install gphoto2")
-
 
 class CameraController(QObject):
     frame_ready = Signal(np.ndarray)
@@ -28,8 +19,6 @@ class CameraController(QObject):
     def __init__(self) -> None:
         super().__init__()
         self._camera = None
-        self._gphoto_camera = None
-        self._use_gphoto2 = False
         self._timer = QTimer()
         self._fps = 30
         self._is_running = False

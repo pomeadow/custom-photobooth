@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QWidget
+from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from controllers.camera_controller import CameraController
 from controllers.image_processor import ImageProcessor
 from controllers.session_manager import SessionManager
@@ -114,13 +113,11 @@ class PhotoboothGUI(QMainWindow):
         self,
         layout_path: str,
         num_photos: int,
-        template_index: int,
         preview_path: str,
     ):
         """Handle layout selection."""
         # Update the current session with selected template info
         self._session_manager.set_template_path(layout_path)
-        self._session_manager.set_template_index(template_index)
         self._session_manager.set_num_photos(num_photos)
         self._session_manager.set_preview(preview_path)
 
