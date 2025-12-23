@@ -42,7 +42,7 @@ counter_css = """
             font-size: 64px; 
             font-weight: bold;
             color: #C9A961;
-            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-family: 'Impact', sans-serif;
             background-color: #81151B;
             padding: 15px;
             border-radius: 20px;
@@ -53,16 +53,8 @@ timer_css = """
             font-size: 64px; 
             font-weight: bold;
             color: #C9A961;
-            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-family: 'Impact', sans-serif;
             background-color: #81151B;
             border-radius: 50%;
-            padding: 30px;
-        """
-loading_overlay_css = """
-            font-size: 32px;
-            font-weight: bold;
-            color: #FFFFFF;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 30px;
-            border-radius: 15px;
+            padding: 10px;
         """

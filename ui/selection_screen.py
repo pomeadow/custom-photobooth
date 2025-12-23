@@ -1,7 +1,7 @@
 import os
 from turtle import st
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QFont, QIcon, QPixmap
 from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
@@ -75,6 +75,7 @@ class SelectionScreen(BaseScreen):
 
         # Get actual screen size
         from PySide6.QtGui import QGuiApplication
+
         screen = QGuiApplication.primaryScreen()
         screen_geometry = screen.geometry()
         print(f"Screen size: {screen_geometry.width()}x{screen_geometry.height()}")
@@ -106,7 +107,7 @@ class SelectionScreen(BaseScreen):
         self.preview_widget.setStyleSheet(widget_50_css)
         self.preview_label = QLabel("Preview")
         self.preview_label.setStyleSheet(
-            "font-size: 24px; font-weight: bold; color: #C9A961;"
+            "font-size: 24px; font-weight: bold; color: #C9A961; font-family: Impact"
         )
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -142,14 +143,19 @@ class SelectionScreen(BaseScreen):
 
         label_instructions = QLabel("Select 2 or all 4 photos")
         label_instructions.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label_instructions.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
-        label_instructions.setStyleSheet("""
+        label_instructions.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed
+        )
+        label_instructions.setStyleSheet(
+            """
             font-size: 32px;
             font-weight: bold;
             color: #C9A961;
-            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-family: 'Impact', sans-serif;
             border-radius: 75px;       
-        """ + widget_50_css)
+        """
+            + widget_50_css
+        )
         bottom_left_layout.addWidget(label_instructions)
         bottom_nav_layout.addLayout(bottom_left_layout, 2)
 
@@ -160,18 +166,26 @@ class SelectionScreen(BaseScreen):
         bottom_nav_layout.addWidget(bottom_right_widget, 1)
 
         start_over_button = QPushButton("Start Over")
-        start_over_button.setStyleSheet(buttons_css + """QPushButton {
+        start_over_button.setFont(QFont("Impact"))
+        start_over_button.setStyleSheet(
+            buttons_css
+            + """QPushButton {
                 padding: 10px 20px;
                 margin: 5px;
-            }""")
+            }"""
+        )
         start_over_button.clicked.connect(lambda: self.navigate_to.emit("title"))
 
         self.print_button = QPushButton("Next")
+        self.print_button.setFont(QFont("Impact"))
         self.print_button.clicked.connect(lambda: self.navigate_to.emit("print"))
-        self.print_button.setStyleSheet(buttons_css + """QPushButton {
+        self.print_button.setStyleSheet(
+            buttons_css
+            + """QPushButton {
                 padding: 10px 20px;
                 margin: 5px;
-            }""")
+            }"""
+        )
         self.print_button.setEnabled(False)
         bottom_right_layout.addWidget(start_over_button)
         bottom_right_layout.addWidget(self.print_button)
@@ -247,7 +261,9 @@ class SelectionScreen(BaseScreen):
             # Deselect
             self.selected_photos.remove(image_path)
             if image_path in self.selected_labels:
-                self.selected_labels[image_path].setStyleSheet(widget_0_css + "border: none;")
+                self.selected_labels[image_path].setStyleSheet(
+                    widget_0_css + "border: none;"
+                )
                 self.selected_labels[image_path].is_selected = False
         else:
             # Select

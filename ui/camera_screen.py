@@ -1,4 +1,5 @@
 from PySide6.QtCore import QEventLoop, QTimer, Qt, Signal
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -37,9 +38,13 @@ class CameraScreen(BaseScreen):
         self.countdown = CountdownTimer()
         self._overlay_path = None
         self.is_flashing = False  # Flag to pause camera updates during flash
-        self.sound_effect = load_sound_effect("./resources/sounds/short-beep-countdown.wav")
-        self.camera_effect = load_sound_effect("./resources/sounds/camera-flash_join.wav")
-        self.sound_effect.setLoopCount(1) # Play only once per trigger
+        self.sound_effect = load_sound_effect(
+            "./resources/sounds/short-beep-countdown.wav"
+        )
+        self.camera_effect = load_sound_effect(
+            "./resources/sounds/camera-flash_join.wav"
+        )
+        self.sound_effect.setLoopCount(1)  # Play only once per trigger
         self.camera_effect.setLoopCount(1)
         self._setup_ui()
         self._connect_signals()
@@ -68,10 +73,12 @@ class CameraScreen(BaseScreen):
 
         # Control buttons
         self.back_button = QPushButton("← Back to Title")
+        self.back_button.setFont(QFont("Impact"))
         self.back_button.clicked.connect(lambda: self.navigate_to.emit("title"))
         self.back_button.setStyleSheet(buttons_css)
 
         self.capture_button = QPushButton("Capture")
+        self.capture_button.setFont(QFont("Impact"))
         self.capture_button.clicked.connect(self._capture_photo)
         self.capture_button.setStyleSheet(buttons_css)
 
@@ -148,7 +155,6 @@ class CameraScreen(BaseScreen):
 
         self.session_manager.save_photo(processed)
 
-        # TODO fix the sound and flash when capture is pressed
         # Add flash effect
         self.flash.flash()
         try:

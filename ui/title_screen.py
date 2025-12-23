@@ -14,7 +14,9 @@ class TitleScreen(BaseScreen):
         self._setup_ui()
 
     def _setup_ui(self):
-        abs_path = os.path.abspath("./resources/UI Asset/UI Background (Solid Colour)-01.png")
+        abs_path = os.path.abspath(
+            "./resources/UI Asset/UI Background (Solid Colour)-01.png"
+        )
         pixmap = QPixmap(abs_path)
 
         self.background_label = QLabel(self)
@@ -25,13 +27,17 @@ class TitleScreen(BaseScreen):
         # Position background to fill entire widget
         self.background_label.setGeometry(self.rect())
         self.background_label.lower()  # Send to back
-        
+
         # Main layout with content
         title_layout = QVBoxLayout(self)
-        title_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
+        title_layout.setAlignment(
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter
+        )
         title_layout.setContentsMargins(100, 0, 100, 80)  # Add bottom margin
 
-        start_photobooth_button = DecorativeButton("START", min_width=800, min_height=120)
+        start_photobooth_button = DecorativeButton(
+            "START", min_width=800, min_height=120
+        )
         start_photobooth_button.clicked.connect(self._emit_signals)
 
         title_layout.addWidget(start_photobooth_button, 0, Qt.AlignmentFlag.AlignCenter)
@@ -40,7 +46,7 @@ class TitleScreen(BaseScreen):
     def resizeEvent(self, event):
         """Update background size when window is resized."""
         super().resizeEvent(event)
-        if hasattr(self, 'background_label'):
+        if hasattr(self, "background_label"):
             self.background_label.setGeometry(self.rect())
 
     def on_enter(self):
@@ -48,6 +54,6 @@ class TitleScreen(BaseScreen):
 
     def on_exit(self):
         return super().on_exit()
-    
+
     def _emit_signals(self):
         self.create_session_signal.emit()

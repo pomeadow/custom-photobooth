@@ -79,13 +79,13 @@ class PrintScreen(BaseScreen):
 
         # Back button
         back_button = QPushButton("Back to Selection")
-        back_button.setFont(QFont("Arial", 16))
+        back_button.setFont(QFont("Impact"))
         back_button.setStyleSheet(buttons_css)
         back_button.clicked.connect(lambda: self.navigate_to.emit("selection"))
 
         # Print button
         print_button = QPushButton("Print Photo")
-        print_button.setFont(QFont("Arial", 16))
+        print_button.setFont(QFont("Impact"))
         print_button.setStyleSheet(buttons_css)
         print_button.clicked.connect(self._on_print_clicked)
 
@@ -93,27 +93,28 @@ class PrintScreen(BaseScreen):
         self.popup_dialog = QDialog(self)
         self.popup_dialog.setWindowTitle("Print Status")
         self.popup_dialog.setModal(True)  # Make it modal (blocks other interactions)
+        # TODO make it center
         self.popup_dialog.setGeometry(QRect(100, 100, 400, 200))
 
         popup_layout = QVBoxLayout(self.popup_dialog)
         popup_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         popup_message = QLabel(text="Sent to print")
-        popup_message.setFont(QFont("Arial", 16))
+        popup_message.setFont(QFont("Impact"))
         popup_message.setAlignment(Qt.AlignmentFlag.AlignCenter)
         popup_message.setStyleSheet("color: black;")
         popup_layout.addWidget(popup_message)  # Add the label to the layout
 
         # Optional: Add a close button
         close_button = QPushButton("OK")
-        close_button.setFont(QFont("Arial", 14))
+        close_button.setFont(QFont("Impact"))
         close_button.setStyleSheet(buttons_css)
         close_button.clicked.connect(self.popup_dialog.close)
         popup_layout.addWidget(close_button)
 
         # Start over button
         start_over_button = QPushButton("Start Over")
-        start_over_button.setFont(QFont("Arial", 16))
+        start_over_button.setFont(QFont("Impact"))
         start_over_button.setStyleSheet(buttons_css)
         start_over_button.clicked.connect(lambda: self.navigate_to.emit("title"))
 

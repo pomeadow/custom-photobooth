@@ -45,7 +45,7 @@ class DecorativeButton(QPushButton):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         rect = self.rect()
-        
+
         # Draw background (solid, not transparent)
         bg_color = QColor(129, 21, 27) if not self.is_hovered else QColor(160, 30, 30)
         if self.is_pressed_state:
@@ -59,72 +59,106 @@ class DecorativeButton(QPushButton):
         corner_inset = quadrant_radius
 
         path = QPainterPath()
-        path.moveTo(rect.left() + corner_inset + quadrant_radius, rect.top() + corner_inset)
-        path.lineTo(rect.right() - quadrant_radius - corner_inset, rect.top() + corner_inset)
+        path.moveTo(
+            rect.left() + corner_inset + quadrant_radius, rect.top() + corner_inset
+        )
+        path.lineTo(
+            rect.right() - quadrant_radius - corner_inset, rect.top() + corner_inset
+        )
         path.arcTo(
             rect.right() - (quadrant_radius + corner_inset),
             rect.top(),
             quadrant_radius * 2,
             quadrant_radius * 2,
-            180, 90
+            180,
+            90,
         )
-        path.lineTo(rect.right() - corner_inset, rect.bottom() - quadrant_radius - corner_inset)
+        path.lineTo(
+            rect.right() - corner_inset, rect.bottom() - quadrant_radius - corner_inset
+        )
         path.arcTo(
             rect.right() - (quadrant_radius + corner_inset),
-            rect.bottom() -  (quadrant_radius + corner_inset),
+            rect.bottom() - (quadrant_radius + corner_inset),
             quadrant_radius * 2,
             quadrant_radius * 2,
-            90, 90)
-        path.lineTo(rect.left() + quadrant_radius + corner_inset, rect.bottom() - corner_inset)
+            90,
+            90,
+        )
+        path.lineTo(
+            rect.left() + quadrant_radius + corner_inset, rect.bottom() - corner_inset
+        )
         path.arcTo(
             rect.left(),
             rect.bottom() - (quadrant_radius + corner_inset),
             quadrant_radius * 2,
             quadrant_radius * 2,
-            0, 90)
-        path.lineTo(rect.left() + corner_inset, rect.top() + quadrant_radius + corner_inset)
+            0,
+            90,
+        )
+        path.lineTo(
+            rect.left() + corner_inset, rect.top() + quadrant_radius + corner_inset
+        )
         path.arcTo(
-            rect.left(),
-            rect.top(),
-            quadrant_radius * 2,
-            quadrant_radius * 2,
-            270, 90)
+            rect.left(), rect.top(), quadrant_radius * 2, quadrant_radius * 2, 270, 90
+        )
         painter.drawPath(path)
         painter.fillPath(path, bg_color)
 
         painter.setPen(QPen(QColor("#C9A961"), 3))
         inner = QPainterPath()
         margin = 5
-        inner.moveTo(rect.left() + corner_inset + quadrant_radius + margin, rect.top() + corner_inset + margin)
-        inner.lineTo(rect.right() - quadrant_radius - corner_inset - margin, rect.top() + corner_inset + margin)
+        inner.moveTo(
+            rect.left() + corner_inset + quadrant_radius + margin,
+            rect.top() + corner_inset + margin,
+        )
+        inner.lineTo(
+            rect.right() - quadrant_radius - corner_inset - margin,
+            rect.top() + corner_inset + margin,
+        )
         inner.arcTo(
             rect.right() - (quadrant_radius + corner_inset) - margin,
             rect.top() + margin,
             quadrant_radius * 2,
             quadrant_radius * 2,
-            180, 90
+            180,
+            90,
         )
-        inner.lineTo(rect.right() - corner_inset - margin, rect.bottom() - quadrant_radius - corner_inset - margin)
+        inner.lineTo(
+            rect.right() - corner_inset - margin,
+            rect.bottom() - quadrant_radius - corner_inset - margin,
+        )
         inner.arcTo(
             rect.right() - (quadrant_radius + corner_inset) - margin,
-            rect.bottom() -  (quadrant_radius + corner_inset) - margin,
+            rect.bottom() - (quadrant_radius + corner_inset) - margin,
             quadrant_radius * 2,
             quadrant_radius * 2,
-            90, 90)
-        inner.lineTo(rect.left() + quadrant_radius + corner_inset + margin, rect.bottom() - corner_inset - margin)
+            90,
+            90,
+        )
+        inner.lineTo(
+            rect.left() + quadrant_radius + corner_inset + margin,
+            rect.bottom() - corner_inset - margin,
+        )
         inner.arcTo(
             rect.left() + margin,
             rect.bottom() - (quadrant_radius + corner_inset) - margin,
             quadrant_radius * 2,
             quadrant_radius * 2,
-            0, 90)
-        inner.lineTo(rect.left() + corner_inset + margin, rect.top() + quadrant_radius + corner_inset + margin)
+            0,
+            90,
+        )
+        inner.lineTo(
+            rect.left() + corner_inset + margin,
+            rect.top() + quadrant_radius + corner_inset + margin,
+        )
         inner.arcTo(
             rect.left() + margin,
             rect.top() + margin,
             quadrant_radius * 2,
             quadrant_radius * 2,
-            270, 90)
+            270,
+            90,
+        )
 
         # Draw inner shape
         painter.drawPath(inner)
