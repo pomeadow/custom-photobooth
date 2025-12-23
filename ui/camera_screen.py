@@ -72,7 +72,7 @@ class CameraScreen(BaseScreen):
         top_panel.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # Control buttons
-        self.back_button = QPushButton("← Back to Title")
+        self.back_button = QPushButton("Back to Title")
         self.back_button.setFont(QFont("Impact"))
         self.back_button.clicked.connect(lambda: self.navigate_to.emit("title"))
         self.back_button.setStyleSheet(buttons_css)

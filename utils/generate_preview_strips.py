@@ -4,7 +4,6 @@
 import os
 import cv2 as cv
 from controllers.image_processor import ImageProcessor
-from config.load_metadata import templates_config
 
 
 def generate_preview_strip(

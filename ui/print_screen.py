@@ -1,4 +1,5 @@
 import os
+import time
 from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
@@ -175,7 +176,8 @@ class PrintScreen(BaseScreen):
         # Save the composite to session folder with DPI preserved
         session_folder = self._session_manager.get_current_session_folder
         if session_folder:
-            output_path = os.path.join(session_folder, "final_composite.png")
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            output_path = os.path.join(session_folder, f"final_composite_{timestamp}.png")
 
             # Get DPI from image processor (preserves original or defaults to 300)
             dpi = self._image_processor.get_composite_dpi()
