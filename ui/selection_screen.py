@@ -13,7 +13,7 @@ from components.clickable_label import ClickableLabel
 from controllers.session_manager import SessionManager
 from ui.base_screen import BaseScreen
 from utils.utils import clear_layout, get_png_file_paths
-from ui.styles import buttons_css, widget_0_css, widget_50_css
+from ui.styles import buttons_css
 from utils.generate_preview_strips import generate_preview_strip
 from config.load_metadata import templates_config_dict
 
@@ -75,6 +75,7 @@ class SelectionScreen(BaseScreen):
         self.selected_photos = []
         self.selected_labels = {}
         self.selected_template_path = None
+        self._update_color_selection_buttons(len(self.selected_photos))
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -103,7 +104,6 @@ class SelectionScreen(BaseScreen):
         # Preview area for strips
         self.preview_widget = QWidget()
         self.preview_layout = QVBoxLayout(self.preview_widget)
-        self.preview_widget.setStyleSheet(widget_50_css)
         self.preview_label = QLabel("Preview")
         self.preview_label.setStyleSheet(
             "font-size: 24px; font-weight: bold; color: #C9A961; font-family: Impact"
@@ -130,7 +130,6 @@ class SelectionScreen(BaseScreen):
         self.template_selection_widget = QWidget()
         self.template_selection_widget.setMinimumHeight(60)  # reserves vertical space
         self.template_selection_widget.setLayout(self.template_selection_labels)
-        self.template_selection_widget.setStyleSheet(widget_50_css)
 
         bottom_nav_layout = QHBoxLayout()
         bottom_widget = QWidget()
@@ -152,7 +151,6 @@ class SelectionScreen(BaseScreen):
             font-family: 'Impact', sans-serif;
             border-radius: 75px;       
         """
-            + widget_50_css
         )
         bottom_left_layout.addWidget(label_instructions)
         bottom_nav_layout.addLayout(bottom_left_layout, 2)
@@ -232,7 +230,6 @@ class SelectionScreen(BaseScreen):
             label = ClickableLabel(path)
             label.setFixedSize(300, 225)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            label.setStyleSheet(widget_0_css)
 
             pixmap = QPixmap(path)
             scaled_pixmap = pixmap.scaled(
@@ -245,10 +242,10 @@ class SelectionScreen(BaseScreen):
 
             # Apply selection styling if already selected
             if path in self.selected_photos:
-                label.setStyleSheet(widget_0_css + "border: 5px solid #C9A961;")
+                label.setStyleSheet("border: 5px solid #C9A961;")
                 label.is_selected = True
             else:
-                label.setStyleSheet(widget_0_css + "border: none;")
+                label.setStyleSheet("border: none;")
 
             self.selected_labels[path] = label
             self.grid_layout.addWidget(label, row, col)
@@ -259,8 +256,7 @@ class SelectionScreen(BaseScreen):
             # Deselect
             self.selected_photos.remove(image_path)
             if image_path in self.selected_labels:
-                self.selected_labels[image_path].setStyleSheet(
-                    widget_0_css + "border: none;"
+                self.selected_labels[image_path].setStyleSheet("border: none;"
                 )
                 self.selected_labels[image_path].is_selected = False
         else:
@@ -268,7 +264,7 @@ class SelectionScreen(BaseScreen):
             self.selected_photos.append(image_path)
             if image_path in self.selected_labels:
                 self.selected_labels[image_path].setStyleSheet(
-                    "border: 5px solid #C9A961;" + widget_0_css
+                    "border: 5px solid #C9A961;"
                 )
                 self.selected_labels[image_path].is_selected = True
 
@@ -294,7 +290,6 @@ class SelectionScreen(BaseScreen):
 
             # Default to first template if multiple available and selected_template_path not set
             if num_selected in [2, 4] and self.selected_template_path is None:
-                print(f"is it called twice ahha")
                 self._on_color_selection_label_clicked(
                     self.filtered_templates_dict.get(
                         f"default"
