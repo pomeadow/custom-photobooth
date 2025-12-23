@@ -27,11 +27,16 @@ class CountdownTimer(QWidget):
         self._timer.start(1000)
 
     def _on_tick(self):
-        if self.seconds_to_countdown > 0:
+        if self.seconds_to_countdown > 1:
             self.seconds_to_countdown -= 1
             self.tick.emit(self.seconds_to_countdown)
         else:
-            self.stop()
+            # 1 sec -> 0 sec
+            self.seconds_to_countdown -= 1
+            # self.tick.emit(self.seconds_to_countdown)
+            self._timer.stop()
+            self._is_running = False
+            self.finished.emit()
 
     def stop(self):
         if not self._is_running:

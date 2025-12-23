@@ -17,8 +17,9 @@ class RangeSelectorWidget(QWidget):
         parent=None,
         disabled_display=True,
         min_value=1,
-        max_value=10,
+        max_value=None,
         label_text="",
+        step=2,
     ):
         super().__init__(parent)
         self.current_value = initial_value
@@ -26,27 +27,25 @@ class RangeSelectorWidget(QWidget):
         self.min_value = min_value
         self.max_value = max_value
         self.label_text = label_text
+        self.step = step
         self.setup_ui()
         self.connect_signals()
 
     def setup_ui(self):
-        """Builds the UI for the custom widget."""
         # Create the widgets
         self.decrement_button = QPushButton("-")
         self.value_display = QLineEdit(str(self.current_value))
         self.increment_button = QPushButton("+")
 
-        # Set larger fixed sizes for buttons
+        # Button and value sizes
         self.decrement_button.setFixedSize(80, 80)
         self.increment_button.setFixedSize(80, 80)
-
-        # Set larger fixed size for value display
         self.value_display.setFixedSize(120, 80)
 
         # Style the buttons with Christmas theme
         button_style = """
             QPushButton {
-                background-color: #d42c2c;
+                background-color: #81151B;
                 color: white;
                 border: none;
                 border-radius: 10px;
@@ -72,16 +71,16 @@ class RangeSelectorWidget(QWidget):
             QLineEdit {
                 font-size: 36px;
                 font-weight: bold;
-                color: #2d5a2d;
-                border: 2px solid #d42c2c;
+                color: #C9A961;
+                border: 2px solid #81151B;
                 border-radius: 10px;
                 background-color: white;
             }
             QLineEdit:disabled {
                 font-size: 36px;
                 font-weight: bold;
-                color: #2d5a2d;
-                border: 2px solid #d42c2c;
+                color: #C9A961;
+                border: 2px solid #81151B;
                 border-radius: 10px;
                 background-color: #f5f5f5;
             }
@@ -100,17 +99,18 @@ class RangeSelectorWidget(QWidget):
 
         # Add label if provided
         if self.label_text:
+            # TODO adjust the label style - more aligned with the selector
             label = QLabel(self.label_text)
             label_font = QFont()
             label_font.setPointSize(18)
             label_font.setBold(True)
             label.setFont(label_font)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            label.setStyleSheet("color: #2d5a2d; margin: 10px;")
+            label.setStyleSheet("color: #C9A961; margin: 10px;")
             main_layout.addWidget(label)
 
         main_layout.addLayout(h_layout)
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setContentsMargins(10, 10, 10, 10)
         self.setLayout(main_layout)
 
     def connect_signals(self):
@@ -121,9 +121,13 @@ class RangeSelectorWidget(QWidget):
     def increment_value(self):
         """Increments the current value."""
         try:
+            if self.step is not None:
+                inc = self.step
+            else:
+                inc = 1
             current_int = int(self.value_display.text())
-            if current_int < self.max_value:
-                self.current_value = current_int + 1
+            if self.max_value is None or current_int < self.max_value:
+                self.current_value = current_int + inc
                 self.value_display.setText(str(self.current_value))
         except ValueError:
             # Handle cases where non-integer text is in the line edit
@@ -132,9 +136,13 @@ class RangeSelectorWidget(QWidget):
     def decrement_value(self):
         """Decrements the current value."""
         try:
+            if self.step is not None:
+                dec = self.step
+            else:
+                dec = 1
             current_int = int(self.value_display.text())
             if current_int > self.min_value:
-                self.current_value = current_int - 1
+                self.current_value = current_int - dec
                 self.value_display.setText(str(self.current_value))
         except ValueError:
             # Handle cases where non-integer text is in the line edit

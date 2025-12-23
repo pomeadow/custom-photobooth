@@ -10,18 +10,31 @@ class SessionManager:
         self._base_dir = Path(base_dir) if base_dir else Path.cwd()
         self._current_session_folder: Optional[Path] = None
         self._template_path = None
-        self._template_index = None
+        self._num_photos = None
+        self._preview_path = None
 
-    def create_session(self, template_path: str, template_index: int):
+    def create_session(self, template_path: str, num_photos):
         """Create new session folder and properties"""
         self._template_path = template_path
-        self._template_index = template_index
+        self._num_photos = num_photos
         now = datetime.datetime.now()
         folder_name = now.strftime("session_%Y%m%d_%H%M%S")
         self._current_session_folder = Path(os.path.join(self._base_dir, folder_name))
         os.makedirs(self._current_session_folder, exist_ok=True)
         print(f"Created session folder: {self._current_session_folder}")
         return self._current_session_folder
+
+    def create_default_session(self):
+        return self.create_session("", None)
+
+    def set_template_path(self, template_path: str):
+        self._template_path = template_path
+
+    def set_num_photos(self, num_photos: int):
+        self._num_photos = num_photos
+
+    def set_preview(self, preview_path):
+        self._preview_path = preview_path
 
     @property
     def get_current_session_folder(self):
@@ -31,16 +44,30 @@ class SessionManager:
     def photo_count(self) -> int:
         """Get number of photos saved in current session."""
         return self._photo_count
-    
+
     @property
     def template_info(self):
         """Get path of templates and index selected"""
-        return self._template_path, self._template_index
+        return (
+            self._template_path,
+            self._num_photos,
+            self._preview_path,
+        )
+
+    def reset_session(self):
+        """Reset the session."""
+        self._current_session_folder = None
+        self._photo_count = 0
+        self._num_photos = None
+        self._template_path = None
+        self._preview_path = None
 
     def close_session(self):
         """Close the current session."""
         self._current_session_folder = None
         self._photo_count = 0
+        self._template_path = None
+        self._preview_path = None
 
     def save_photo(self, frame):
         # Save the captured image to current session folder

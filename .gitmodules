@@ -1,0 +1,3 @@
+[submodule "python_parallel_print"]
+	path = python_parallel_print
+	url = https://github.com/isaacwkz/python_parallel_print

@@ -10,5 +10,13 @@ A simple photobooth script that has the following features
 pyenv activate venv
 ```
 
+v0.1 flow
+1) User come in and press start
+2) 30 seconds countdown
+3) then take 4 photos
+4) then ask user to choose the photos they want (min 2, max 3)
+5) give a preview of the strip of 3 photo or strip of 2, choose number of prints (even)
+
+![alt text](preview.jpg)
 
 # custom-photobooth
