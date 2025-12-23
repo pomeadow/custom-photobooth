@@ -1,5 +1,4 @@
 import os
-from timeit import default_timer
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
@@ -116,15 +115,7 @@ class SelectionScreen(BaseScreen):
         self.preview_strip_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.preview_strip_label.setVisible(False)
 
-        self.loading_label = QLabel("Loading preview...")
-        self.loading_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        self.loading_label.setStyleSheet(
-            "font-size: 50px; font-weight: bold; color: #C9A961; font-family: Arial"
-        )
-        self.loading_label.setVisible(False)
-
         self.preview_layout.addWidget(self.preview_label)
-        self.preview_layout.addWidget(self.loading_label)
         self.preview_layout.addWidget(self.preview_strip_label)
         self.preview_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -264,7 +255,6 @@ class SelectionScreen(BaseScreen):
 
     def _on_label_clicked(self, image_path):
         """Handle image selection/deselection"""
-        start_time = default_timer()
         if image_path in self.selected_photos:
             # Deselect
             self.selected_photos.remove(image_path)
@@ -283,14 +273,6 @@ class SelectionScreen(BaseScreen):
                 self.selected_labels[image_path].is_selected = True
 
         print(f"Selected photos: {len(self.selected_photos)} - {self.selected_photos}")
-
-        print(f"is visible 1: {default_timer() - start_time}")
-        if not self.preview_strip_label.isVisible() and len(self.selected_photos) in [
-            2,
-            4,
-        ]:
-            self.loading_label.setVisible(True)
-            print(f"setting it to true {default_timer() - start_time}")
 
         # Show color selection buttons
         self._update_color_selection_buttons(len(self.selected_photos))
@@ -352,7 +334,6 @@ class SelectionScreen(BaseScreen):
                     strip_path,
                 )
                 self.print_button.setEnabled(True)
-                self.loading_label.setVisible(False)
             else:
                 print(f"Failed to generate preview strip for {num_selected} photos")
                 self._hide_preview_strip()

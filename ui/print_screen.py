@@ -94,8 +94,6 @@ class PrintScreen(BaseScreen):
         self.popup_dialog.setWindowTitle("Print Status")
         self.popup_dialog.setModal(True)  # Make it modal (blocks other interactions)
         # TODO make it center
-        # QtGui.QGuiApplication.primaryScreen().geometry().center()
-
         self.popup_dialog.setGeometry(QRect(100, 100, 400, 200))
 
         popup_layout = QVBoxLayout(self.popup_dialog)
@@ -193,5 +191,6 @@ class PrintScreen(BaseScreen):
         print("Sending to printer...")
         self.popup_dialog.show()
         self.printer.print_images(
-            output_path, num_copies=self.add_number_of_prints_label.current_value
+            output_path,
+            num_copies=int(self.add_number_of_prints_label.current_value / 2),
         )
