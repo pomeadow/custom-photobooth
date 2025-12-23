@@ -65,8 +65,8 @@ class PrintScreen(BaseScreen):
         self.add_number_of_prints_label = RangeSelectorWidget(
             initial_value=2,
             min_value=2,
-            max_value=10,
-            label_text="Number of half 4R prints",
+            max_value=None,
+            label_text="Number of prints",
         )
         self.add_number_of_prints_label.setMaximumHeight(300)
         self.preview_layout.addWidget(self.add_number_of_prints_label, 1)
@@ -94,6 +94,8 @@ class PrintScreen(BaseScreen):
         self.popup_dialog.setWindowTitle("Print Status")
         self.popup_dialog.setModal(True)  # Make it modal (blocks other interactions)
         # TODO make it center
+        # QtGui.QGuiApplication.primaryScreen().geometry().center()
+
         self.popup_dialog.setGeometry(QRect(100, 100, 400, 200))
 
         popup_layout = QVBoxLayout(self.popup_dialog)

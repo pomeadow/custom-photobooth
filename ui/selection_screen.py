@@ -1,4 +1,5 @@
 import os
+from timeit import default_timer
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
@@ -36,6 +37,16 @@ class SelectionScreen(BaseScreen):
         super().__init__(parent)
         self.session_manager = session_manager
         self.current_session_folder = None
+        self.filtered_templates_dict = {
+            2: self._get_suitable_templates(2),
+            4: self._get_suitable_templates(4),
+        }
+        self.filtered_templates_dict["default"] = list(
+            self.filtered_templates_dict.get(2).keys()
+        )[0]
+        self.filtered_templates_dict["default_4"] = list(
+            self.filtered_templates_dict.get(4).keys()
+        )[0]
         self._setup_ui()
 
     def on_enter(self):
@@ -68,16 +79,6 @@ class SelectionScreen(BaseScreen):
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
-
-        # Debug: Print widget size (might not be final yet)
-        print(f"Widget size at setup: {self.size()}")
-
-        # Get actual screen size
-        from PySide6.QtGui import QGuiApplication
-
-        screen = QGuiApplication.primaryScreen()
-        screen_geometry = screen.geometry()
-        print(f"Screen size: {screen_geometry.width()}x{screen_geometry.height()}")
 
         self.current_page = 0
         self.images_per_page = 4
@@ -115,7 +116,15 @@ class SelectionScreen(BaseScreen):
         self.preview_strip_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.preview_strip_label.setVisible(False)
 
+        self.loading_label = QLabel("Loading preview...")
+        self.loading_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.loading_label.setStyleSheet(
+            "font-size: 50px; font-weight: bold; color: #C9A961; font-family: Arial"
+        )
+        self.loading_label.setVisible(False)
+
         self.preview_layout.addWidget(self.preview_label)
+        self.preview_layout.addWidget(self.loading_label)
         self.preview_layout.addWidget(self.preview_strip_label)
         self.preview_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -130,7 +139,6 @@ class SelectionScreen(BaseScreen):
         self.template_selection_widget = QWidget()
         self.template_selection_widget.setMinimumHeight(60)  # reserves vertical space
         self.template_selection_widget.setLayout(self.template_selection_labels)
-        self.template_selection_widget.setVisible(False)
         self.template_selection_widget.setStyleSheet(widget_50_css)
 
         bottom_nav_layout = QHBoxLayout()
@@ -256,6 +264,7 @@ class SelectionScreen(BaseScreen):
 
     def _on_label_clicked(self, image_path):
         """Handle image selection/deselection"""
+        start_time = default_timer()
         if image_path in self.selected_photos:
             # Deselect
             self.selected_photos.remove(image_path)
@@ -275,9 +284,16 @@ class SelectionScreen(BaseScreen):
 
         print(f"Selected photos: {len(self.selected_photos)} - {self.selected_photos}")
 
+        print(f"is visible 1: {default_timer() - start_time}")
+        if not self.preview_strip_label.isVisible() and len(self.selected_photos) in [
+            2,
+            4,
+        ]:
+            self.loading_label.setVisible(True)
+            print(f"setting it to true {default_timer() - start_time}")
+
         # Show color selection buttons
         self._update_color_selection_buttons(len(self.selected_photos))
-        self.template_selection_widget.setVisible(True)
         # Update preview strip when 2 or 4 photos are selected
         self._update_preview_strip()
 
@@ -285,21 +301,26 @@ class SelectionScreen(BaseScreen):
         """Generate and display preview strip based on number of selected photos and template."""
         num_selected = len(self.selected_photos)
 
-        filtered_templates = self._get_suitable_templates(num_selected)
-
+        # implicitly checks for 2 or 4 photos
+        filtered_templates = self.filtered_templates_dict.get(num_selected)
         if self.current_session_folder:
-            if len(filtered_templates) == 0:
+            if filtered_templates is None or len(filtered_templates) == 0:
                 print(f"No suitable templates found for {num_selected} photos")
                 self._hide_preview_strip()
                 self.selected_template_path = None
-                self.template_selection_widget.setVisible(False)
                 return
 
             # Default to first template if multiple available and selected_template_path not set
-            if self.selected_template_path is None:
+            if num_selected in [2, 4] and self.selected_template_path is None:
+                print(f"is it called twice ahha")
                 self._on_color_selection_label_clicked(
-                    list(filtered_templates.keys())[0]
+                    self.filtered_templates_dict.get(
+                        f"default"
+                        if num_selected not in [4]
+                        else f"default_{num_selected}"
+                    )
                 )
+                return
 
             # Generate preview strip
             strip_path = generate_preview_strip(
@@ -323,7 +344,6 @@ class SelectionScreen(BaseScreen):
                 )
                 self.preview_strip_label.setPixmap(scaled_pixmap)
                 self.preview_strip_label.setVisible(True)
-                self.preview_label.setVisible(True)
                 print(f"Updated preview strip with {num_selected} photos: {strip_path}")
                 print(f"Selected template: path={self.selected_template_path}")
                 self.layout_selected.emit(
@@ -332,7 +352,7 @@ class SelectionScreen(BaseScreen):
                     strip_path,
                 )
                 self.print_button.setEnabled(True)
-
+                self.loading_label.setVisible(False)
             else:
                 print(f"Failed to generate preview strip for {num_selected} photos")
                 self._hide_preview_strip()
@@ -340,20 +360,19 @@ class SelectionScreen(BaseScreen):
             # Hide preview if not 2 or 4 photos selected
             self._hide_preview_strip()
             self.selected_template_path = None
-            self.template_selection_widget.setVisible(False)
 
     def _update_color_selection_buttons(self, num_photos: int):
         """Update the color selection buttons based on number of photos."""
         if num_photos not in [2, 4]:
-            return
-
+            filtered_templates = self.filtered_templates_dict.get(2)
+            self.selected_template_path = None
+        else:
+            filtered_templates = self.filtered_templates_dict.get(num_photos)
         try:
             # Clear existing buttons
             clear_layout(self.template_selection_labels)
         except:
             pass  # in case there are no widgets yet
-
-        filtered_templates = self._get_suitable_templates(num_photos)
 
         for i in filtered_templates:
             template_selection_label = ClickableLabel(i)

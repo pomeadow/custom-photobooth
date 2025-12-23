@@ -39,7 +39,7 @@ class CameraScreen(BaseScreen):
         self._overlay_path = None
         self.is_flashing = False  # Flag to pause camera updates during flash
         self.sound_effect = load_sound_effect(
-            "./resources/sounds/short-beep-countdown.wav"
+            "./resources/sounds/multi-sleigh-bells.wav"
         )
         self.camera_effect = load_sound_effect(
             "./resources/sounds/camera-flash_join.wav"
@@ -136,7 +136,7 @@ class CameraScreen(BaseScreen):
 
         # Apply overlay and convert to pixmap
         processed = self.image_processor.apply_overlay(
-            frame, None, flip_horizontal=False
+            frame, None, flip_horizontal=True
         )
         pixmap = self.image_processor.frame_to_qpixmap(
             processed,

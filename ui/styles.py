@@ -6,6 +6,7 @@ buttons_css = """
                 padding: 20px 40px;
                 border-radius: 10px;
                 margin: 30px;
+                border: 3px solid #C9A961;
             }
             QPushButton:hover {
                 background-color: #b82424;
@@ -57,4 +58,5 @@ timer_css = """
             background-color: #81151B;
             border-radius: 50%;
             padding: 10px;
+            border: 5px solid #C9A961;
         """

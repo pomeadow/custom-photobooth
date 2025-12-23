@@ -34,6 +34,7 @@ def clear_layout(layout):
         elif item.layout() is not None:
             clear_layout(item.layout())  # Recurse into nested layouts
 
+
 def load_sound_effect(file_path):
     effect = QSoundEffect()
     abs_path = os.path.abspath(file_path)

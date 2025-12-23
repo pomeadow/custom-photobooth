@@ -17,7 +17,7 @@ class RangeSelectorWidget(QWidget):
         parent=None,
         disabled_display=True,
         min_value=1,
-        max_value=10,
+        max_value=None,
         label_text="",
         step=2,
     ):
@@ -126,7 +126,7 @@ class RangeSelectorWidget(QWidget):
             else:
                 inc = 1
             current_int = int(self.value_display.text())
-            if current_int < self.max_value:
+            if self.max_value is None or current_int < self.max_value:
                 self.current_value = current_int + inc
                 self.value_display.setText(str(self.current_value))
         except ValueError:
