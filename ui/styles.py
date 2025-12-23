@@ -23,16 +23,6 @@ label_css = """
             }
 """
 
-widget_0_css = """
-    QWidget {
-        background-color: rgba(0, 0, 0, 0);
-}"""
-
-widget_50_css = """
-    QWidget {
-        background-color: rgba(255, 255, 255, 0.5);
-}"""
-
 widget_text_colour = """
     QLabel {
         color: #C9A961;

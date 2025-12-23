@@ -76,6 +76,7 @@ class SelectionScreen(BaseScreen):
         self.selected_labels = {}
         self.selected_template_path = None
         self._update_color_selection_buttons(len(self.selected_photos))
+        self.print_button.setEnabled(False)
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -183,6 +184,7 @@ class SelectionScreen(BaseScreen):
             }"""
         )
         self.print_button.setEnabled(False)
+
         bottom_right_layout.addWidget(start_over_button)
         bottom_right_layout.addWidget(self.print_button)
 
@@ -277,6 +279,9 @@ class SelectionScreen(BaseScreen):
 
     def _update_preview_strip(self):
         """Generate and display preview strip based on number of selected photos and template."""
+        # Always disable print button initially
+        self.print_button.setEnabled(False)
+
         num_selected = len(self.selected_photos)
 
         # implicitly checks for 2 or 4 photos
@@ -322,7 +327,6 @@ class SelectionScreen(BaseScreen):
                 self.preview_strip_label.setPixmap(scaled_pixmap)
                 self.preview_strip_label.setVisible(True)
                 print(f"Updated preview strip with {num_selected} photos: {strip_path}")
-                print(f"Selected template: path={self.selected_template_path}")
                 self.layout_selected.emit(
                     self.selected_template_path,
                     num_selected,
