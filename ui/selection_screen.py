@@ -1,7 +1,6 @@
 import os
-from turtle import st
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont, QIcon, QPixmap
+from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,

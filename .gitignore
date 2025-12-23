@@ -2,7 +2,7 @@
 .ruff_cache
 .vscode
 scratch.py
-/__pycache__/
+/__pycache__/*
 *.log
 
 
